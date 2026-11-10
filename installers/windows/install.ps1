@@ -154,7 +154,7 @@ if ($raw.Trim()) {
   $s = New-Object PSObject
 }
 
-$entry = [pscustomobject]@{ hooks = @([pscustomobject]@{ type = 'command'; command = $command; async = $true; timeout = 30 }) }
+$entry = [pscustomobject]@{ hooks = @([pscustomobject]@{ type = 'command'; command = $command; async = $true; timeout = 60 }) }
 if (-not ($s.PSObject.Properties.Name -contains 'hooks')) { $s | Add-Member -NotePropertyName hooks -NotePropertyValue (New-Object PSObject) }
 if (-not ($s.hooks.PSObject.Properties.Name -contains 'Stop')) { $s.hooks | Add-Member -NotePropertyName Stop -NotePropertyValue @() }
 $s.hooks.Stop = @(@($s.hooks.Stop) + $entry)

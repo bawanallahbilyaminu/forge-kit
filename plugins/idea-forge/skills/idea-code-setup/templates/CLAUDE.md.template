@@ -45,7 +45,7 @@ Before building a feature that needs architecture decisions (new components, dat
 - Never merge PRs yourself. The user reviews and merges.
 - Never force-push, `reset --hard`, rewrite published history or delete branches you didn't create.
 - The repo is private on GitHub (`{{owner}}/{{slug}}`).
-- A Stop hook (`.claude/hooks/git-guard.ps1`) checks for uncommitted or unpushed work at the end of each turn.
+- A Stop hook (`{{git-guard file}}`) checks for uncommitted or unpushed work at the end of each turn.
 
 ## Reporting back
 End each turn with:

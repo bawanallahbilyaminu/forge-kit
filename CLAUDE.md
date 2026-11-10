@@ -23,9 +23,18 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
 | Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
 | Run the Pester tests | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1` (add `-Path tests/handoff` for one folder). Uses Pester 3.4.0, which ships with Windows PowerShell 5.1, so there's nothing to install. Takes about 2 minutes, because each hook run waits 2 seconds and the lock test waits 30. |
+| Run the Node hook tests (macOS/Linux hooks, any OS) | `node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs tests/handoff/hook-command.test.mjs` (Node 18+, nothing to install). Takes about 40 seconds. On Windows the two `sh` hook-command tests are skipped, and `parity.test.mjs` compares `handoff.mjs` with `handoff.ps1`. Elsewhere it's skipped. |
+| Regenerate the expected `last.md` files | `node tests/handoff/update-expected.mjs` (Windows only: `handoff.ps1` is the reference). Run it only after an intended change to the `last.md` layout, and review the diff in `tests/fixtures/handoff/expected/`. |
 | Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
 
-CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, `claude plugin validate` and the build.
+CI (`.github/workflows/ci.yml`) has two jobs:
+- **`check`** (`windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, the Node hook tests (including parity with `handoff.ps1`), `claude plugin validate` and the build.
+- **`posix`** (`ubuntu-latest` with Node 18 and 22, and `macos-latest` with Node 22) runs the Node hook tests.
+
+## Hooks on each platform
+Each hook has a PowerShell version for Windows and a Node version for macOS and Linux (`docs/adr/0001-cross-platform-hooks.md`). Both must behave the same and print the same messages. A behaviour change updates both scripts and both test files (`*.Tests.ps1` and `*.test.mjs`) in the same commit.
+
+The code-handoff `hooks/hooks.json` command must stay valid as both sh and PowerShell. Claude Code runs it with `sh -c` on macOS and Linux, Git Bash on Windows, and PowerShell when Git Bash is missing. Don't put a `}` inside its `${env:-eval "..."}` part. Run `tests/handoff/hook-command.test.mjs` after any change to it. See "One hook command for every platform" in `docs/architecture.md`.
 
 ## Rules for this repo
 - **Skills are instructions for Claude.** Write them in the imperative ("Read the file", not "You should read"). Keep each SKILL.md under about 3,000 words and move detail into `references/`. Frontmatter descriptions say when the skill is used, with trigger phrases.

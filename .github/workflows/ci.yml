@@ -64,6 +64,12 @@ jobs:
         with:
           node-version: '22'
 
+      # The Node hooks also run on Windows, and only here can handoff.mjs be compared with
+      # handoff.ps1 (parity.test.mjs). The git-guard sh tests skip themselves on Windows.
+      - name: Node hook tests, with handoff.ps1 parity
+        shell: bash
+        run: node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs tests/handoff/hook-command.test.mjs
+
       - name: Install Claude Code CLI
         shell: bash
         run: npm install -g @anthropic-ai/claude-code
@@ -84,3 +90,31 @@ jobs:
         with:
           name: plugins
           path: dist/*.plugin
+
+  # macOS and Linux: the Node versions of the hooks (docs/adr/0001-cross-platform-hooks.md).
+  # Node 18 is the oldest version the hooks support; 22 is the current LTS line used elsewhere.
+  posix:
+    name: posix (${{ matrix.os }}, node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '22'
+          - os: macos-latest
+            node: '22'
+          - os: ubuntu-latest
+            node: '18'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Node hook tests (git-guard and handoff, node:test)
+        run: |
+          node --version
+          git --version
+          node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs tests/handoff/hook-command.test.mjs
