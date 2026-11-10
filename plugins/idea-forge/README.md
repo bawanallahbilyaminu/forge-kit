@@ -27,4 +27,5 @@ Each stage reads the previous stage's file, so you can continue in a different c
 ## Requirements
 - The Claude desktop app, with your projects folder connected. The default is `C:\Projects-Windows` on Windows and `~/Projects` on macOS and Linux. The first command asks once where to keep your projects, saves the answer in `<projects>\_idea-forge\config.json`, and asks for access to that folder. To move it later, tell any idea-forge command to use a different folder, or edit `projectsDir` in that file.
 - GitHub CLI (`gh`) signed in on your computer. Claude Code uses it to create the repo.
+- The git guard that `/idea-code-setup` adds to a new project is `git-guard.ps1` on Windows, which needs nothing extra. On macOS and Linux it's `git-guard.mjs`, which needs Node 18 or later. Without Node it does nothing.
 - code-handoff installed once, either as the plugin or with the Windows installer (`installers\windows\install.ps1` in forge-kit), but not both. It gives `/code-handoff:next` (or `/next` if you used the installer) in Claude Code and `/code-handoff` in the planning chat.
