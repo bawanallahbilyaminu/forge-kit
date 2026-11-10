@@ -24,7 +24,7 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 
 ## M3: Tests
 - [x] Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript. Done on branch `m3-tests`: `tests/handoff/handoff.Tests.ps1` (Pester 3.4.0) also covers duplicate runs, the lock timeout, the home-folder skip, and the leftovers and stale-hook cases from code-handoff 0.2.2. Run it with `scripts/run-tests.ps1`, which CI also runs.
-- [ ] Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`.
+- [x] Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`. Done on branch `m3-tests`: `tests/git-guard/git-guard.Tests.ps1` tests the shipped template (identical to this repo's live `.claude/hooks/git-guard.ps1`). It uses temp repos with a local bare remote, and also covers counting several changes, being behind the upstream, no remote, no commits yet, the `cwd` fallback and bad JSON.
 
 ## M4: Public release
 - Polish the README with a GIF of the loop, write a CHANGELOG, tag v0.1.0, and attach the `.plugin` files to a GitHub Release.
