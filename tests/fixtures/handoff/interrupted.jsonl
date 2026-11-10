@@ -1,0 +1,6 @@
+{"type": "user", "message": {"role": "user", "content": "Earlier prompt: list the files."}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Earlier reply: here are the files."}]}}
+{"type": "user", "message": {"role": "user", "content": "Refactor the parser module."}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Starting the refactor."}, {"type": "tool_use", "id": "t1", "name": "Edit", "input": {"file_path": "C:/example/project/src/parser.js", "old_string": "a", "new_string": "b"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t1", "content": "The file was updated."}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "[Request interrupted by user for tool use]"}]}}

@@ -16,13 +16,15 @@
 - [x] **No-context review in `/idea-launch`** (borrowed from EGM's "goldfish" reviewers). After the documents are written, spawn fresh agents that get only the finished SRS and SDD, with no chat history and no ideation files. One looks for gaps and contradictions. One checks whether Claude Code could build M0 and M1 from these documents alone. One checks traceability against the test cases. Fix what they find, or list it under Open questions, and add a short review summary to `docs/README.md`. Done in idea-forge 0.3.0: see step 6 of the idea-launch skill and `references/reviewers.md`.
 - [x] **Point new projects at EGM for big features.** In `/idea-code-setup`'s CLAUDE.md template, add a rule: before building a feature that needs architecture decisions, run the EGM workflow (`/egm:egm-brainstorm`, then `/egm:egm-draft`, then `/egm:egm-review`) if the EGM plugin is installed, and save the design under `docs/04-architecture/features/`. Mention EGM as optional in the forge-kit README, with a link to github.com/google/elephant-goldfish-model. Done in idea-forge 0.3.1: see "Designing big features" in `idea-code-setup/templates/CLAUDE.md.template`.
 
+Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests before it's ported. Decided in the planning chat on 2026-11-10.
+
 ## M2: macOS and Linux
 - A bash version of `handoff.sh` and `git-guard.sh` that needs only POSIX tools plus `jq`, or a single Node script if that's simpler. Record the choice in an ADR.
 - `hooks.json` picks the right script for each platform.
 
 ## M3: Tests
-- Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript.
-- Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`.
+- [x] Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript. Done on branch `m3-tests`: `tests/handoff/handoff.Tests.ps1` (Pester 3.4.0) also covers duplicate runs, the lock timeout, the home-folder skip, and the leftovers and stale-hook cases from code-handoff 0.2.2. Run it with `scripts/run-tests.ps1`, which CI also runs.
+- [ ] Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`.
 
 ## M4: Public release
 - Polish the README with a GIF of the loop, write a CHANGELOG, tag v0.1.0, and attach the `.plugin` files to a GitHub Release.
@@ -31,6 +33,7 @@
 ## Known issues
 - The planning app can't write inside a project's `.claude/` folder unless that folder itself is connected. idea-code-setup therefore stages its files in `setup/dot-claude/`, and the kickoff moves them. Shipped in 0.1.1.
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
+- `handoff.ps1`: when two runs start at the same moment in a project with no `.claude/handoff/` folder yet, both create `.gitignore` before taking the mutex. The loser writes a spurious "being used by another process" line to `hook-error.log` and exits. The turn is still written once by the other run. This was found by the M3 tests, and a skipped test is ready for the fix, which is to ignore that write error.
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 ## Changelog
 - 0.3.2 (marketplace), code-handoff 0.2.2:

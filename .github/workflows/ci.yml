@@ -45,6 +45,17 @@ jobs:
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-powershell.ps1
 
+      - name: Pester tests (Pester 3.4.0, Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Get-Module -ListAvailable Pester | Where-Object { $_.Version -eq [version]'3.4.0' })) {
+            Write-Host 'Pester 3.4.0 not on the image; installing it.'
+            Install-Module Pester -RequiredVersion 3.4.0 -Scope CurrentUser -SkipPublisherCheck -Force
+          }
+          powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
       - name: Check shared skill files are identical
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-shared-refs.ps1
