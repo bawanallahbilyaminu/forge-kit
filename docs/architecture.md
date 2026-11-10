@@ -36,6 +36,15 @@ code-handoff can be installed as a Claude Code plugin (recommended) or by `insta
 - **Pester 3.4.0, pinned.** It ships with Windows PowerShell 5.1 on Windows 10/11 and Windows Server, including the `windows-latest` runner, so the tests run with nothing to install, on the same PowerShell the hooks target. `scripts/run-tests.ps1` imports exactly 3.4.0, refuses to run under `pwsh`, and exits 1 if a test fails or none ran. The tests use Pester 3 syntax (`Should Be`), which Pester 5 rejects. Moving to Pester 5 would mean installing it everywhere and rewriting the assertions, which isn't worth it for a 5.1-only hook.
 - CI runs the tests in their own step, after the PowerShell checks. If Pester 3.4.0 is ever missing from the image, the step installs that exact version first.
 
+### handoff.mjs (macOS and Linux)
+- `scripts/handoff.mjs` is the Node 18+ port of `handoff.ps1` (ADR 0001). It isn't in `hooks.json` yet. It writes the same `last.md` with LF line endings, uses the same `.last-turn` key, and has the same plugin-copy guard. The user's settings are `~/.claude/settings.json`, and it also recognises other hooks that run `handoff.mjs` or `handoff.sh`.
+- **Lock:** instead of the named mutex there's an atomic `mkdir` of `.claude/handoff/.lock`, with an `owner` file holding the pid and a random token. Waiters poll every 100 ms for up to 30 seconds. A lock whose owner pid is gone, that has had no owner file for 5 seconds, or that is older than 60 seconds is renamed aside and removed, so only one waiter clears it. The owner removes the lock in `finally`, and only if the token is still its own. A timeout is logged, and the run continues without the lock.
+- **Tests:**
+  - `tests/handoff/handoff.test.mjs` (node:test) mirrors the Pester cases that apply outside Windows, with a temp `HOME` and project per test, so the tests run concurrently.
+  - The fixture cases are in `tests/fixtures/handoff/cases.json`.
+  - `parity.test.mjs` runs both implementations on Windows and compares `last.md` after `normalizeLastMd`, which drops the timestamp line, line endings and the order of tied tools.
+  - `tests/fixtures/handoff/expected/` holds the normalized `handoff.ps1` output, from `update-expected.mjs`, so macOS and Linux check against the same reference.
+
 ## idea-forge
 
 ```mermaid

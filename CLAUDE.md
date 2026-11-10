@@ -23,11 +23,12 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
 | Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
 | Run the Pester tests | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1` (add `-Path tests/handoff` for one folder). Uses Pester 3.4.0, which ships with Windows PowerShell 5.1, so there's nothing to install. Takes about 2 minutes, because each hook run waits 2 seconds and the lock test waits 30. |
-| Run the Node hook tests (macOS/Linux hooks, any OS) | `node --test tests/git-guard/git-guard.test.mjs` (Node 18+, nothing to install). The two `sh` hook-command tests are skipped on Windows. |
+| Run the Node hook tests (macOS/Linux hooks, any OS) | `node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs` (Node 18+, nothing to install). Takes about 40 seconds. On Windows the two `sh` hook-command tests are skipped, and `parity.test.mjs` compares `handoff.mjs` with `handoff.ps1`. Elsewhere it's skipped. |
+| Regenerate the expected `last.md` files | `node tests/handoff/update-expected.mjs` (Windows only: `handoff.ps1` is the reference). Run it only after an intended change to the `last.md` layout, and review the diff in `tests/fixtures/handoff/expected/`. |
 | Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
 
 CI (`.github/workflows/ci.yml`) has two jobs:
-- **`check`** (`windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, `claude plugin validate` and the build.
+- **`check`** (`windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, the Node hook tests (including parity with `handoff.ps1`), `claude plugin validate` and the build.
 - **`posix`** (`ubuntu-latest` with Node 18 and 22, and `macos-latest` with Node 22) runs the Node hook tests.
 
 ## Hooks on each platform

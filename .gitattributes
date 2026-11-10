@@ -1,0 +1,2 @@
+# Test fixtures keep LF line endings on every platform (the parser and expected output assume LF).
+tests/fixtures/** text eol=lf

@@ -64,6 +64,12 @@ jobs:
         with:
           node-version: '22'
 
+      # The Node hooks also run on Windows, and only here can handoff.mjs be compared with
+      # handoff.ps1 (parity.test.mjs). The git-guard sh tests skip themselves on Windows.
+      - name: Node hook tests, with handoff.ps1 parity
+        shell: bash
+        run: node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs
+
       - name: Install Claude Code CLI
         shell: bash
         run: npm install -g @anthropic-ai/claude-code
@@ -107,8 +113,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: git-guard tests (node:test)
+      - name: Node hook tests (git-guard and handoff, node:test)
         run: |
           node --version
           git --version
-          node --test tests/git-guard/git-guard.test.mjs
+          node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs

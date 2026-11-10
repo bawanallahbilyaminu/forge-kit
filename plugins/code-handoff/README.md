@@ -38,4 +38,4 @@ Older projects may still have their own copy of the handoff, from before it was 
 Don't touch `.claude/handoff/`: it holds the turn summaries and `next.md`. Restart Claude Code (`claude --continue`) after editing settings. The plugin never deletes anything itself.
 
 ## Platform support
-The hook is PowerShell, so it runs on Windows only for now. A bash version for macOS and Linux is on the roadmap.
+The plugin's hook runs `scripts/handoff.ps1`, so it works on Windows only for now. A Node version for macOS and Linux, `scripts/handoff.mjs` (Node 18 or later, no packages), is written and tested on Linux and macOS, and it writes the same `last.md` as the PowerShell version. The next step is for the plugin's `hooks.json` to pick it on those platforms.

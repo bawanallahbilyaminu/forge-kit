@@ -21,7 +21,7 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 ## M2: macOS and Linux
 - [x] Choose between POSIX tools plus `jq` and a single Node script per hook, and record the choice in an ADR. Done: `docs/adr/0001-cross-platform-hooks.md` picks Node (18+, built-in modules only) for macOS and Linux and keeps PowerShell on Windows.
 - [x] git-guard for macOS and Linux. Done in idea-forge 0.4.0: `idea-code-setup/templates/git-guard.mjs` and `settings.posix.json.template`. Its node:test tests (`tests/git-guard/git-guard.test.mjs`) use the same cases as the Pester tests and run in CI on `ubuntu-latest` (Node 18 and 22) and `macos-latest` (Node 22).
-- [ ] handoff for macOS and Linux (`handoff.mjs`), with tests ported from `tests/handoff/handoff.Tests.ps1`.
+- [x] handoff for macOS and Linux (`handoff.mjs`), with tests ported from `tests/handoff/handoff.Tests.ps1`. Done in code-handoff 0.3.0: `plugins/code-handoff/scripts/handoff.mjs`, with `tests/handoff/handoff.test.mjs` (36 tests) and `parity.test.mjs` (`last.md` matches `handoff.ps1`'s output for the shared fixtures). It isn't wired into `hooks.json` yet.
 - [ ] The code-handoff `hooks.json` picks the right script for each platform.
 
 ## M3: Tests
@@ -37,6 +37,27 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 ## Changelog
+- 0.4.1 (marketplace), code-handoff 0.3.0:
+  - New `plugins/code-handoff/scripts/handoff.mjs`, the Node 18+ port of `handoff.ps1` for macOS and Linux, using built-in modules only. It isn't used yet: `hooks.json` still runs `handoff.ps1`, and the platform switch is the next M2 item.
+  - **Ported:**
+    - the transcript parser (prompt, progress notes, final reply, tool counts, files changed, commands and errors)
+    - the same `last.md` layout, the `history.md` append and trim, the `transcript.jsonl` copy and `.gitignore`
+    - the home-folder skip, the 2-second wait and tolerance of a missing or half-written transcript
+    - the `.last-turn` duplicate skip, with the same key as `handoff.ps1`
+    - the `.gitignore` race fix
+    - the plugin-copy guard for live and stale hooks in `~/.claude/settings.json` and the project's settings files, and the leftovers note
+    - every failure logged to `hook-error.log`, with exit 0
+  - **Lock:** the named mutex is replaced by an atomic `mkdir` lock, `.claude/handoff/.lock`, which holds an owner file with the pid and a token. Waiters poll for up to 30 seconds. A lock whose owner process has exited, that was never claimed for 5 seconds, or that is older than 60 seconds is renamed away and taken over. The owner removes it in `finally`. A timeout is logged and the run continues, as in `handoff.ps1`.
+  - **Differences on purpose:**
+    - LF line endings.
+    - Tools with equal counts are listed by name. `handoff.ps1` leaves ties in hash order.
+    - The user-level double-install note doesn't mention `install.ps1`, because the installer is Windows-only.
+    - Other hooks are recognised by `handoff.ps1`, `handoff.mjs` or `handoff.sh`.
+    - Error lines in `hook-error.log` carry the message without a PowerShell line number.
+  - **Tests:**
+    - `tests/handoff/handoff.test.mjs` (node:test, 36 tests, run concurrently) mirrors the Pester cases that apply outside Windows. That includes the POSIX path forms `~`, `$HOME`, `${HOME}`, `${CLAUDE_PROJECT_DIR}`, `$CLAUDE_PROJECT_DIR`, relative and absolute paths, plus dead-owner and unclaimed locks.
+    - `tests/handoff/parity.test.mjs` (Windows) checks that both implementations write the same `last.md` for the shared fixtures, apart from the timestamp line, line endings and the order of tied tools. `tests/fixtures/handoff/expected/` holds that output, made from `handoff.ps1` by `update-expected.mjs`, for macOS and Linux.
+    - CI runs the Node tests on all three posix jobs and now also in the Windows job, where the parity test can run.
 - 0.4.0 (marketplace), idea-forge 0.4.0:
   - `/idea-code-setup` supports macOS and Linux. It picks the platform from the projects folder path. On macOS and Linux a new project gets `.claude/hooks/git-guard.mjs`, a Node 18+ script with no packages, and the Stop hook from `settings.posix.json.template`: `if command -v node >/dev/null 2>&1; then node "$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs"; fi`. Exit 2 still blocks, and without Node the hook exits 0. Windows projects get exactly the same files as before.
   - `git-guard.mjs` has the same behaviour and messages as `git-guard.ps1`. The "Do these first" list asks macOS and Linux users to check `node --version`. The CLAUDE.md template names the platform's git guard file.

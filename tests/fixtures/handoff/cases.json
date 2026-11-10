@@ -1,0 +1,11 @@
+{
+  "session": "fixture-session",
+  "cwd": "/example/project",
+  "cases": [
+    { "fixture": "normal-turn", "reply": "Added the greeting line to the README." },
+    { "fixture": "tool-errors", "reply": "The tests failed: 2 failures." },
+    { "fixture": "interrupted", "reply": "" },
+    { "fixture": "slash-command", "reply": "Ran the prepared prompt." },
+    { "fixture": "lagging-partial", "reply": "Wrote the changelog entry." }
+  ]
+}
