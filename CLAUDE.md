@@ -20,6 +20,7 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Validate a plugin | `claude plugin validate plugins/<name>/.claude-plugin/plugin.json` |
 | Validate the marketplace | `claude plugin validate .claude-plugin/marketplace.json` |
 | Build `.plugin` files | `powershell -File scripts/build-plugins.ps1` (writes `dist/`) |
+| Redraw the plugin icons | `powershell -NoProfile -File scripts/make-icons.ps1` (writes `plugins/*/.claude-plugin/icon.png`, 1024x1024) |
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
 | Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
 | Run the Pester tests | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1` (add `-Path tests/handoff` for one folder). Uses Pester 3.4.0, which ships with Windows PowerShell 5.1, so there's nothing to install. Takes about 2 minutes, because each hook run waits 2 seconds and the lock test waits 30. |

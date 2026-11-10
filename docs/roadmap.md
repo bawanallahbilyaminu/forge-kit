@@ -35,7 +35,7 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 ## Known issues
 - The planning app can't write inside a project's `.claude/` folder unless that folder itself is connected. idea-code-setup therefore stages its files in `setup/dot-claude/`, and the kickoff moves them. Shipped in 0.1.1.
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
-- The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
+
 ## Changelog
 - 0.5.0 (marketplace), code-handoff 0.4.0:
   - code-handoff now works on macOS, Linux and WSL. `hooks/hooks.json` has one shell-form Stop hook, still `async: true`, whose command is valid as both sh and PowerShell:
