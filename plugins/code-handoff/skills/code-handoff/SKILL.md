@@ -54,7 +54,8 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
 
 ## Troubleshooting
 
-- **No `last.md` after a Code turn.** The hook isn't running. Check that `settings.local.json` has the Stop hook. Ask the user to run `/hooks` in Claude Code, or restart Code with `claude --continue`. The command assumes Git Bash, which is Claude Code's default shell on Windows. If Git Bash isn't installed, change the hook to PowerShell exec form: `"shell": "powershell"`, `"command": "powershell.exe"`, `"args": ["-NoProfile","-ExecutionPolicy","Bypass","-File","${CLAUDE_PROJECT_DIR}/.claude/hooks/handoff.ps1"]`.
+- **No `last.md` after a Code turn.** The hook isn't running. Check that the code-handoff plugin is installed and enabled (`/plugin` in Claude Code), or, with the installer, that `%USERPROFILE%\.claude\settings.json` has the Stop hook. Then ask the user to run `/hooks` in Claude Code, or restart Code with `claude --continue`. Also read `hook-error.log`: the plugin skips turns while an old per-project hook is active.
+- **`hook-error.log` mentions leftovers or a per-project Stop hook.** The project still has the old per-project setup. Walk the user through "Upgrading from the per-project setup" in the plugin README.
 - **The prompt shows `(not found in transcript)` or files are missing.** The transcript lagged. The final reply still comes from the hook input, and the next turn will catch up.
 
 ## New projects

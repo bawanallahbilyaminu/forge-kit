@@ -6,7 +6,10 @@
 #   handoff/transcript.jsonl copy of the latest session's full transcript
 # Installed at user level, so it runs for every project. Always exits 0 so it can never block Claude Code.
 # Runs as the code-handoff plugin (CLAUDE_PLUGIN_ROOT set) or as a copy placed by
-# installers\windows\install.ps1. If both are active, the plugin copy steps aside.
+# installers\windows\install.ps1. If another handoff.ps1 Stop hook is active (the installer's
+# in the user's settings.json, or an old per-project one in the project's settings.json or
+# settings.local.json), the plugin copy steps aside. The plugin copy also notes, once, any
+# leftover files from the old per-project setup.
 
 $ErrorActionPreference = 'Stop'
 $handoff = $null
@@ -24,12 +27,12 @@ function Sha1Hex($text) {
   $sha = [System.Security.Cryptography.SHA1]::Create()
   return ([BitConverter]::ToString($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes([string]$text)))) -replace '-', ''
 }
-# True when the user-level settings.json has a Stop hook running a handoff.ps1 that is not
-# this plugin's copy, i.e. installers\windows\install.ps1 is also active. Bad JSON -> false.
-function InstallerHookActive($pluginRoot) {
+# True when the settings file at $sp has a Stop hook running a handoff.ps1 that is not this
+# plugin's copy: the installer's copy (user settings.json) or an old per-project copy
+# (project settings.json or settings.local.json). Missing file or bad JSON -> false.
+function ForeignHandoffHook($sp, $pluginRoot) {
   try {
-    $sp = Join-Path ([string]$env:USERPROFILE) '.claude\settings.json'
-    if (-not (Test-Path -LiteralPath $sp)) { return $false }
+    if (-not $sp -or -not (Test-Path -LiteralPath $sp)) { return $false }
     $s = [System.IO.File]::ReadAllText($sp) | ConvertFrom-Json
     if (-not $s -or -not $s.hooks) { return $false }
     $root = (([string]$pluginRoot) -replace '\\', '/').TrimEnd('/').ToLowerInvariant()
@@ -67,19 +70,57 @@ try {
   $gi = Join-Path $handoff '.gitignore'
   if (-not (Test-Path -LiteralPath $gi)) { [System.IO.File]::WriteAllText($gi, "*`n", $utf8) }
 
-  # Double install: when this is the plugin copy and the installer copy is also in the
-  # user's settings.json, let the installer copy write the turn and stop here (before the mutex).
-  if ($env:CLAUDE_PLUGIN_ROOT -and (InstallerHookActive $env:CLAUDE_PLUGIN_ROOT)) {
-    $marker = Join-Path $handoff '.double-install-noted'
-    if (-not (Test-Path -LiteralPath $marker)) {
-      $note = "$(Get-Date -Format s) code-handoff is installed twice: as the Claude Code plugin and by installers\windows\install.ps1. " +
-              "The plugin copy now skips so each turn is written once. To keep only the plugin, run " +
-              "'powershell -ExecutionPolicy Bypass -File installers\windows\install.ps1 -Uninstall' from the forge-kit repo, " +
-              "or remove the handoff.ps1 Stop hook from %USERPROFILE%\.claude\settings.json.`r`n"
-      [System.IO.File]::AppendAllText((Join-Path $handoff 'hook-error.log'), $note, $utf8)
-      [System.IO.File]::WriteAllText($marker, (Get-Date -Format s), $utf8)
+  if ($env:CLAUDE_PLUGIN_ROOT) {
+    # Leftovers from the old per-project setup: note them once. Never delete, never skip for these.
+    try {
+      $leftMarker = Join-Path $handoff '.leftovers-noted'
+      if (-not (Test-Path -LiteralPath $leftMarker)) {
+        $found = @()
+        foreach ($rel in @('.claude\commands\next.md', '.claude\hooks\handoff.ps1', '.claude\handoff-kit')) {
+          if (Test-Path -LiteralPath (Join-Path $projectDir $rel)) { $found += $rel }
+        }
+        if ($found.Count -gt 0) {
+          $note = "$(Get-Date -Format s) Found leftovers from the old per-project code-handoff setup in this project: " +
+                  ($found -join ', ') + ". The code-handoff plugin now provides the hook and the command " +
+                  "(/code-handoff:next), so these can be deleted. If a Stop hook in .claude\settings.json or " +
+                  ".claude\settings.local.json still runs handoff.ps1, remove that hook entry first. Keep .claude\handoff\. " +
+                  "See 'Upgrading from the per-project setup' in the code-handoff README. Nothing was deleted, and turns are still written.`r`n"
+          [System.IO.File]::AppendAllText((Join-Path $handoff 'hook-error.log'), $note, $utf8)
+          [System.IO.File]::WriteAllText($leftMarker, (Get-Date -Format s), $utf8)
+        }
+      }
+    } catch { }
+
+    # Double install: if another handoff.ps1 Stop hook is active, let that copy write the
+    # turn and stop here (before the mutex). Checked in order: user, project, project local.
+    $userSettings = $null
+    if ($env:USERPROFILE) { $userSettings = Join-Path $env:USERPROFILE '.claude\settings.json' }
+    $sources = @(
+      @{ Path = $userSettings; Marker = '.double-install-noted'; Kind = 'user' },
+      @{ Path = (Join-Path $projectDir '.claude\settings.json'); Marker = '.project-hook-noted'; Kind = '.claude\settings.json' },
+      @{ Path = (Join-Path $projectDir '.claude\settings.local.json'); Marker = '.project-local-hook-noted'; Kind = '.claude\settings.local.json' }
+    )
+    foreach ($src in $sources) {
+      if (-not (ForeignHandoffHook $src.Path $env:CLAUDE_PLUGIN_ROOT)) { continue }
+      $marker = Join-Path $handoff $src.Marker
+      if (-not (Test-Path -LiteralPath $marker)) {
+        if ($src.Kind -eq 'user') {
+          $note = "$(Get-Date -Format s) code-handoff is installed twice: as the Claude Code plugin and by installers\windows\install.ps1 " +
+                  "(Stop hook in %USERPROFILE%\.claude\settings.json). The plugin copy now skips so each turn is written once. " +
+                  "To keep only the plugin, run 'powershell -ExecutionPolicy Bypass -File installers\windows\install.ps1 -Uninstall' " +
+                  "from the forge-kit repo, or remove the handoff.ps1 Stop hook from %USERPROFILE%\.claude\settings.json.`r`n"
+        } else {
+          $note = "$(Get-Date -Format s) code-handoff is installed twice: as the Claude Code plugin and as a per-project Stop hook " +
+                  "in this project's $($src.Kind). The plugin copy now skips so each turn is written once by the project copy. " +
+                  "To keep only the plugin, remove the handoff.ps1 Stop hook entry from $($src.Kind) and keep its other settings. " +
+                  "If that hook's script no longer exists, no turns are being written until you remove it. " +
+                  "See 'Upgrading from the per-project setup' in the code-handoff README.`r`n"
+        }
+        [System.IO.File]::AppendAllText((Join-Path $handoff 'hook-error.log'), $note, $utf8)
+        [System.IO.File]::WriteAllText($marker, (Get-Date -Format s), $utf8)
+      }
+      exit 0
     }
-    exit 0
   }
 
   # Serialise runs for this project: Claude Code can fire the Stop hook twice for one turn.
