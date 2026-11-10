@@ -138,7 +138,12 @@ try {
   $handoff = Join-Path $projectDir '.claude\handoff'
   New-Item -ItemType Directory -Force -Path $handoff | Out-Null
   $gi = Join-Path $handoff '.gitignore'
-  if (-not (Test-Path -LiteralPath $gi)) { [System.IO.File]::WriteAllText($gi, "*`n", $utf8) }
+  if (-not (Test-Path -LiteralPath $gi)) {
+    # Two first runs in a new project can race here. If this write fails but the file now
+    # exists, the other run wrote it: ignore that. Anything else goes to the outer catch.
+    try { [System.IO.File]::WriteAllText($gi, "*`n", $utf8) }
+    catch { if (-not (Test-Path -LiteralPath $gi)) { throw } }
+  }
 
   if ($env:CLAUDE_PLUGIN_ROOT) {
     # Leftovers from the old per-project setup: note them once. Never delete, never skip for these.

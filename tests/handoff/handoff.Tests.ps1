@@ -144,7 +144,7 @@ Describe 'handoff.ps1 duplicate runs and locking' {
   }
 
   # The handoff folder already exists here, as it does after a project's first turn: see the
-  # skipped test below for the race when it doesn't.
+  # next test for the case when it doesn't.
   It 'two runs at the same time write the turn once (mutex plus .last-turn)' {
     $p = New-TestProject $script:root 'dup-concurrent'
     Set-TestFile (Join-Path $p '.claude\handoff\.gitignore') "*`n"
@@ -159,10 +159,9 @@ Describe 'handoff.ps1 duplicate runs and locking' {
     (Get-MatchCount (Get-LogLines $p) 'timed out|line \d+') | Should Be 0
   }
 
-  # Known issue (docs/roadmap.md): two simultaneous runs in a brand-new project both create
-  # .claude\handoff\.gitignore before taking the mutex, and the loser logs a spurious error.
-  # The turn is still written once. Remove -Skip when handoff.ps1 is fixed.
-  It 'two simultaneous first runs in a new project log no error (known issue)' -Skip {
+  # Two simultaneous runs in a brand-new project both create .claude\handoff\.gitignore before
+  # taking the mutex. Before code-handoff 0.2.3 the loser logged a spurious error.
+  It 'two simultaneous first runs in a new project log no error' {
     $p = New-TestProject $script:root 'dup-concurrent-first'
     $tp = New-SimpleTranscript $p 1
     $a = Invoke-Handoff -Project $p -Transcript $tp -Reply 'reply 1' -UserHome $script:fakeHome -NoWait
