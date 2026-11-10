@@ -41,5 +41,5 @@ flowchart LR
 ```
 
 - The **council and refine** stages spawn parallel subagents: 5 critics, then an advocate, then a judge; or 5 builders, then a synthesizer, then a red-team check. Each stage saves its output to `<projects>/_idea-forge/<slug>/`, so the user can continue in another chat.
-- **Launch** writes the documents in dependency layers so that the requirement IDs trace through: `UR` → `FR` → design section → `TC`. It can use one agent per document within a layer.
+- **Launch** writes the documents in dependency layers so that the requirement IDs trace through: `UR` → `FR` → design section → `TC`. It can use one agent per document within a layer. For software it ends with an independent review: three fresh agents that get only the SRS, SDD and test plan (never the chat or the ideation files) look for gaps and contradictions, check whether Claude Code could build M0 and M1 from them, and check traceability. Their briefs are in `idea-launch/references/reviewers.md`.
 - **Code setup** adds `git-guard.ps1`, a Stop hook that sends Claude Code back once (exit code 2, guarded by `stop_hook_active`) when there's uncommitted or unpushed work.

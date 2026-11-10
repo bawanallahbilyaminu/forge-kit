@@ -4,7 +4,7 @@ Two plugins for people who plan with Claude in the app and build with Claude Cod
 
 | Plugin | What it does |
 |---|---|
-| **idea-forge** | Takes an idea from a chat to a project ready to build:<br>• `/idea-council`: five critics attack the idea, an advocate answers them, and a judge gives a verdict.<br>• `/idea-refine`: five builders improve the idea into an approved concept.<br>• `/idea-launch`: creates the project folder and the full documentation set (BRD, PRD, URS, SRS, SDD, data design, wireframes, test plan, WBS and more).<br>• `/idea-code-setup`: writes CLAUDE.md, settings, a commit-and-push guard and a kickoff prompt for Claude Code. |
+| **idea-forge** | Takes an idea from a chat to a project ready to build:<br>• `/idea-council`: five critics attack the idea, an advocate answers them, and a judge gives a verdict.<br>• `/idea-refine`: five builders improve the idea into an approved concept.<br>• `/idea-launch`: creates the project folder and the full documentation set (BRD, PRD, URS, SRS, SDD, data design, wireframes, test plan, WBS and more), then has fresh agents with no context review the SRS and SDD.<br>• `/idea-code-setup`: writes CLAUDE.md, settings, a commit-and-push guard and a kickoff prompt for Claude Code. |
 | **code-handoff** | Connects a planning chat to Claude Code. Claude Code writes every turn to `.claude/handoff/`. The planning chat reads it with `/code-handoff` and writes the next prompt, which Claude Code runs with `/next`. |
 
 ## Install
