@@ -2,12 +2,12 @@
 name: idea-launch
 description: >
   This skill should be used when the user types /idea-launch, or asks to "launch the idea",
-  "create the project folder", "set up the project in Projects-Windows" or "write all the
-  documentation for this idea". It creates the project folder in C:\Projects-Windows with a folder
-  structure, and writes the full documentation set for the idea's type (URS, SRS, BRD, PRD, SDD,
+  "create the project folder", "set up the project in my projects folder" or "write all the
+  documentation for this idea". It creates the project folder in the user's projects folder with a
+  folder structure, and writes the full documentation set for the idea's type (URS, SRS, BRD, PRD, SDD,
   data design, wireframes, test plan, WBS and more for software).
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # Idea Launch: project folder and documentation
@@ -16,16 +16,16 @@ Turn the approved Refined Concept into a real project folder with a complete, co
 
 ## 1. Load and check
 
-Get access to `C:\Projects-Windows` (device_bash on `$HOME/mnt/Projects-Windows`, or the local file tools). If it isn't connected, request access with device_request_folder_access, giving the reason "to create your new project folder".
+Resolve the projects folder as described in `references/projects-folder.md`. Use the reason "to create your new project folder" if you need to request access.
 
-Read `_idea-forge\<slug>\02-refined-concept.md` and `01-council-verdict.md`.
+Read `<projects>/_idea-forge/<slug>/02-refined-concept.md` and `01-council-verdict.md`.
 - If the concept's `status` isn't `approved`, tell the user and ask whether to approve it now or go back to `/idea-refine`.
 - If there are no files but the idea was refined in this chat, use the chat. First save the concept file with `status: approved`, after the user confirms.
 
 ## 2. Confirm the name and type, once
 
 With one AskUserQuestion call, confirm:
-- the **folder name**: the slug by default, for example `C:\Projects-Windows\kobo-sms-bridge`
+- the **folder name**: the slug by default, for example `<projects>/kobo-sms-bridge`, shown to the user as the real path on their computer
 - the **idea type** from the concept, which selects the document set in `references/idea-types.md`
 
 If the folder already exists and isn't empty, stop and ask whether to use a different name or add into it. Never overwrite existing files.
@@ -81,7 +81,7 @@ When everything is written:
 - List the tree to confirm every planned file exists and isn't empty.
 - Grep for leftovers: `TODO`, `TBD`, `Lorem`, `<placeholder>`, `XX`. Replace them, or move each to Open questions.
 - Re-check the traceability matrix against the SRS and test cases.
-- Update `_idea-forge\<slug>\02-refined-concept.md` front matter to `stage: launched` with the folder path.
+- Update `<projects>/_idea-forge/<slug>/02-refined-concept.md` front matter to `stage: launched` with the folder path.
 
 Reply to the user with:
 - where the project is

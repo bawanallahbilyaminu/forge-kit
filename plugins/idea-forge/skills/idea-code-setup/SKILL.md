@@ -7,7 +7,7 @@ description: >
   that enforces commit-and-push, a .gitignore and a kickoff prompt that has Claude Code create a
   private GitHub repo and start milestone M0.
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # Idea Code Setup: ready for Claude Code
@@ -19,7 +19,7 @@ Prepare a launched project so that Claude Code can start building with one comma
 
 ## 1. Load the project
 
-Get access to `C:\Projects-Windows` (device_bash on `$HOME/mnt/Projects-Windows`, or the local file tools). Request access if it isn't connected. Find the project folder, either the one just launched in this chat or the one the user names, and check that it has a `docs/` folder. If it doesn't, suggest `/idea-launch` first.
+Resolve the projects folder as described in `../idea-launch/references/projects-folder.md`. Find the project folder, either the one just launched in this chat or the one the user names, and check that it has a `docs/` folder. If it doesn't, suggest `/idea-launch` first.
 
 Read:
 - `README.md`
@@ -59,9 +59,9 @@ Check:
 Finish with a short **Do these first** checklist:
 1. **GitHub CLI signed in.** In PowerShell, run `gh auth status`. If it says "not logged in", run `gh auth login`, choose GitHub.com, HTTPS, and sign in with the browser.
 2. **Handoff installed.** For later turns, the user needs the code-handoff plugin or the one-time handoff installer, which provide `/next` and the turn summaries.
-3. **Open Claude Code in the project.** In PowerShell, run `cd C:\Projects-Windows\<slug>` and then `claude`.
+3. **Open Claude Code in the project.** In PowerShell (or a terminal on macOS and Linux), run `cd` to the project folder's real path, `<projects>/<slug>`, and then `claude`. Write the real path into the step, for example `cd D:\Work\Projects\kobo-sms-bridge`.
 4. **Start it.** Paste this into Claude Code: `Read docs/kickoff-prompt.md and carry it out.` Claude Code moves its settings into place, reads the docs, creates the private repo `<slug>`, pushes the docs, and builds M0 on a branch with a pull request. After this first run, `/next` works as usual.
 
 Then tell them: when Code finishes, run `/code-handoff` in the planning chat to review M0 and plan M1. Add the project's `.claude` folder to that chat first.
 
-Update `_idea-forge\<slug>\02-refined-concept.md` front matter to `stage: ready-to-code`.
+Update `<projects>/_idea-forge/<slug>/02-refined-concept.md` front matter to `stage: ready-to-code`.

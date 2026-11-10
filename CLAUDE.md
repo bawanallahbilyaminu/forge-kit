@@ -32,7 +32,7 @@ CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the versi
   - Around native commands like `git`, use `$ErrorActionPreference = 'SilentlyContinue'`.
   - Hooks must always exit 0 unless they intentionally block with exit code 2.
 - **Hooks must never break a user's session.** Wrap everything in try/catch and log failures to the handoff folder, not to the console.
-- **Paths:** use `${CLAUDE_PLUGIN_ROOT}` in plugin hooks. Never hardcode a user's path. `C:\Projects-Windows` in idea-forge is the author's default and becomes configurable in M1.
+- **Paths:** use `${CLAUDE_PLUGIN_ROOT}` in plugin hooks. Never hardcode a user's path. idea-forge resolves the projects folder through `plugins/idea-forge/skills/idea-launch/references/projects-folder.md`. `C:\Projects-Windows` appears only as the stated Windows default.
 - **Bump versions** in `plugin.json` and `marketplace.json` for any user-visible change, and note the change in `docs/roadmap.md` under Changelog.
 - **No personal data** in the repo, such as emails, tokens, client names or real project data.
 

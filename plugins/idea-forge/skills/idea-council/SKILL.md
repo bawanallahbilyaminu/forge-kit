@@ -7,7 +7,7 @@ description: >
   idea, an advocate who answers them, and a judge who gives a Build / Build with changes /
   Don't build verdict.
 metadata:
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # Idea Council: brutal critique and verdict
@@ -60,12 +60,9 @@ Spawn one **Judge** agent, a fresh agent that hasn't written anything yet. Give 
 
 ## 5. Save and present
 
-Get access to the user's `C:\Projects-Windows` folder:
-- If it's connected, use device_bash on `$HOME/mnt/Projects-Windows`, or the local file tools if this session runs on the computer.
-- If it isn't, request access with device_request_folder_access (reason: "to save your idea's council verdict"), or ask the user to add it with + → Add folder.
-- If access isn't possible, keep everything in the chat and say so.
+Resolve the projects folder as described in `../idea-launch/references/projects-folder.md`. Use the reason "to save your idea's council verdict" if you need to request access. If access isn't possible, keep everything in the chat and say so.
 
-Write `C:\Projects-Windows\_idea-forge\<slug>\01-council-verdict.md` containing the Idea Brief, the full critiques under a heading for each critic, the advocate's reply and the judge's verdict. Start the file with front matter: `slug`, `name`, `type`, `date`, `verdict`, `stage: council`.
+Write `<projects>/_idea-forge/<slug>/01-council-verdict.md` containing the Idea Brief, the full critiques under a heading for each critic, the advocate's reply and the judge's verdict. Start the file with front matter: `slug`, `name`, `type`, `date`, `verdict`, `stage: council`.
 
 Reply to the user in this order:
 1. The verdict and confidence level, stated plainly in the first line.

@@ -10,7 +10,7 @@
       "name": "idea-forge",
       "source": "./plugins/idea-forge",
       "description": "A council of critics gives an idea a verdict, a council of builders refines it, then the project folder, the full documentation set and the Claude Code setup are generated.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "category": "productivity"
     },
     {
