@@ -13,13 +13,13 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
 
 ## How it is set up in a project
 
-- A Stop hook, `handoff.ps1`, runs after every Claude Code turn. It is normally installed once at user level (`%USERPROFILE%\.claude\hooks\` and `settings.json`), and older projects may have it in `.claude/settings.local.json`.
+- A Stop hook, `handoff.ps1`, runs after every Claude Code turn. It is installed once for all projects, either as the code-handoff Claude Code plugin (recommended) or by the Windows installer (`%USERPROFILE%\.claude\hooks\` and `settings.json`). Older projects may have it in `.claude/settings.local.json`.
 - `.claude/handoff/` (gitignored by its own `.gitignore`):
   - `last.md`: latest turn. It holds the time, session id, tools used, prompt, progress notes, final reply, files changed, commands run and errors.
   - `history.md`: every turn appended, newest at the bottom.
   - `transcript.jsonl`: raw copy of the latest session. Use it only when last.md lacks a detail, and grep it rather than reading it whole.
   - `next.md`: the prompt this chat writes for Code.
-  - `hook-error.log`: present only if the hook failed.
+  - `hook-error.log`: present only if the hook failed, timed out waiting for its lock, or found code-handoff installed twice. For a double install, tell the user to keep one copy (see the plugin README's Install section).
 - `/next` in Claude Code (`commands/next.md`, user level or in the project) runs `handoff/next.md`. `/next some extra note` adds a note.
 
 ## Steps
@@ -28,7 +28,7 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
 2. **Read** `last.md` with `cat`. If the user asks about more than the last turn, `tail -n 300 history.md`. If `hook-error.log` exists, mention it.
 3. **Report briefly.** Say what Code did, which files it changed, which commands failed and what errors came up, and any question Code asked or anything it is waiting on. Flag anything that looks off, such as failed tests, edits outside the agreed scope, a task declared done without being verified, or a stale timestamp (compare **When** with now).
 4. **Sort out the user's steps.** Go through Code's reply and the plan for the next move. Separate what only the user can do from what Code can do. Things only the user can do include:
-   - merging or approving a PR, or anything in a web dashboard (GitHub, Kobo, hosting)
+   - merging or approving a PR, or anything in a web dashboard (GitHub, a hosting dashboard, a cloud console)
    - running something Code can't or shouldn't, such as commands needing their credentials, commands Code's permissions put on `ask` or `deny`, or anything on a real account
    - entering secrets or tokens, or creating accounts and API keys
    - making a decision, such as a name, a design choice or a scope call

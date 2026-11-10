@@ -18,6 +18,8 @@ Two plugins for people who plan with Claude in the app and build with Claude Cod
 
 **Claude app (planning side):** install the same plugins from the `.plugin` files on the Releases page.
 
+code-handoff can also be installed without the plugin system, with a Windows installer. See [code-handoff's Install section](plugins/code-handoff/README.md#install) for both options, how to switch between them, and what happens if both are installed.
+
 ## Requirements
 - Windows for the code-handoff hook, because it's PowerShell. macOS and Linux support is on the roadmap.
 - The Claude desktop app with your projects folder connected, so idea-forge can create project folders.

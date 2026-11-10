@@ -12,7 +12,7 @@
 ## M1: Portability
 - [x] Make the projects folder configurable in idea-forge. Ask once and remember the answer in `<projects>/_idea-forge/config.json`. Default to `C:\Projects-Windows` on Windows and `~/Projects` elsewhere. Done in 0.2.0: see `plugins/idea-forge/skills/idea-launch/references/projects-folder.md`.
 - [x] Remove the author-specific wording from the skills. Keep the local context examples, such as Hausa and Sokoto, as examples only. Done in 0.2.1.
-- [ ] Document the two ways to install code-handoff (plugin or installer), and make sure they can't both run.
+- [x] Document the two ways to install code-handoff (plugin or installer), and make sure they can't both run. Done in code-handoff 0.2.0: see "Two install paths, one active hook" in `docs/architecture.md`.
 - [ ] **No-context review in `/idea-launch`** (borrowed from EGM's "goldfish" reviewers). After the documents are written, spawn fresh agents that get only the finished SRS and SDD, with no chat history and no ideation files. One looks for gaps and contradictions. One checks whether Claude Code could build M0 and M1 from these documents alone. One checks traceability against the test cases. Fix what they find, or list it under Open questions, and add a short review summary to `docs/README.md`.
 - [ ] **Point new projects at EGM for big features.** In `/idea-code-setup`'s CLAUDE.md template, add a rule: before building a feature that needs architecture decisions, run the EGM workflow (`/egm:egm-brainstorm`, then `/egm:egm-draft`, then `/egm:egm-review`) if the EGM plugin is installed, and save the design under `docs/04-architecture/features/`. Mention EGM as optional in the forge-kit README, with a link to github.com/google/elephant-goldfish-model.
 
@@ -32,9 +32,13 @@
 - The planning app can't write inside a project's `.claude/` folder unless that folder itself is connected. idea-code-setup therefore stages its files in `setup/dot-claude/`, and the kickoff moves them. Shipped in 0.1.1.
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. `install.ps1` hasn't run yet (its source paths were checked in M0).
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
-- The handoff hook can be installed twice (plugin and installer), and then every turn is written twice.
-
 ## Changelog
+- 0.2.2 (marketplace), code-handoff 0.2.0:
+  - The double install is handled. When the plugin copy of `handoff.ps1` finds the installer's Stop hook in `%USERPROFILE%\.claude\settings.json`, it exits before taking the lock, so each turn is written once with no wait. It notes this once per project in `hook-error.log`.
+  - `install.ps1` refuses to install while the code-handoff plugin is installed and enabled (according to `installed_plugins.json` and `enabledPlugins`), unless `-Force` is given.
+  - New `install.ps1 -Uninstall` removes only the installer's hook entry and files, with a `settings.json.bak-handoff-uninstall` backup.
+  - The code-handoff README has an Install section comparing the plugin (recommended) and the installer (fallback), with how to switch and what happens if both are installed. The root README links to it.
+  - The code-handoff skill's dashboard example is generic, and it explains the double-install note in `hook-error.log`.
 - 0.2.1 (idea-forge and the marketplace):
   - The skills no longer assume who the user is. Removed the regional idiom "yarned" from idea-council, and the assumptions that the user has a job (Cost critic) and their own company (Business Model builder). The privacy NFR now asks for the data protection law where the users and data are, with GDPR and the NDPA as examples, instead of defaulting to Nigeria's NDPA.
   - The local-context examples are framed as examples, such as "for example, a user in Sokoto, Nigeria" and "Hausa and English for users in northern Nigeria", and the critics and builders now ask about the users' languages in general.
