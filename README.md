@@ -11,7 +11,7 @@ Two plugins for people who plan with Claude in the app and build with Claude Cod
 
 **Claude Code**
 ```
-/plugin marketplace add <owner>/forge-kit
+/plugin marketplace add bawanallahbilyaminu/forge-kit
 /plugin install code-handoff@forge-kit
 /plugin install idea-forge@forge-kit
 ```

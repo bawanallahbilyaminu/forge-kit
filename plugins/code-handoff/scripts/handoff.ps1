@@ -8,6 +8,8 @@
 
 $ErrorActionPreference = 'Stop'
 $handoff = $null
+$mutex = $null
+$locked = $false
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 
 function Clip($s, $n) {
@@ -15,6 +17,10 @@ function Clip($s, $n) {
   $s = [string]$s
   if ($s.Length -gt $n) { return $s.Substring(0, $n) + ' ...[truncated]' }
   return $s
+}
+function Sha1Hex($text) {
+  $sha = [System.Security.Cryptography.SHA1]::Create()
+  return ([BitConverter]::ToString($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes([string]$text)))) -replace '-', ''
 }
 function TextOf($content) {
   if ($null -eq $content) { return '' }
@@ -35,6 +41,19 @@ try {
   New-Item -ItemType Directory -Force -Path $handoff | Out-Null
   $gi = Join-Path $handoff '.gitignore'
   if (-not (Test-Path -LiteralPath $gi)) { [System.IO.File]::WriteAllText($gi, "*`n", $utf8) }
+
+  # Serialise runs for this project: Claude Code can fire the Stop hook twice for one turn.
+  # Released in the outer finally, which every path after this point goes through.
+  $mutex = New-Object System.Threading.Mutex($false, ('Local\claude-handoff-' + (Sha1Hex $handoff.ToLowerInvariant())))
+  try { $locked = $mutex.WaitOne(30000) }
+  catch {
+    # AbandonedMutexException: the previous holder exited without releasing; we now own it.
+    $ex = $_.Exception
+    if ($ex -is [System.Threading.AbandonedMutexException] -or $ex.InnerException -is [System.Threading.AbandonedMutexException]) { $locked = $true }
+  }
+  if (-not $locked) {
+    [System.IO.File]::AppendAllText((Join-Path $handoff 'hook-error.log'), "$(Get-Date -Format s) mutex wait timed out, continuing without lock`r`n", $utf8)
+  }
 
   Start-Sleep -Seconds 2   # the transcript is written asynchronously; give it a moment
 
@@ -120,56 +139,73 @@ try {
   if (-not $reply -and $texts.Count -gt 0) { $reply = $texts[$texts.Count - 1] }
   if (-not $prompt) { $prompt = '(not found in transcript)' }
 
-  # --- build the markdown ---
-  $sb = New-Object System.Text.StringBuilder
-  [void]$sb.AppendLine('# Claude Code - latest turn')
-  [void]$sb.AppendLine('')
-  [void]$sb.AppendLine("- **When:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
-  [void]$sb.AppendLine("- **Session:** $($hook.session_id)")
-  [void]$sb.AppendLine("- **Working dir:** $($hook.cwd)")
-  if ($toolCounts.Count -gt 0) {
-    $summary = ($toolCounts.GetEnumerator() | Sort-Object Value -Descending | ForEach-Object { "$($_.Key) x$($_.Value)" }) -join ', '
-    [void]$sb.AppendLine("- **Tools used:** $summary")
-  }
-  [void]$sb.AppendLine('')
-  [void]$sb.AppendLine('## Prompt'); [void]$sb.AppendLine(''); [void]$sb.AppendLine((Clip $prompt 6000)); [void]$sb.AppendLine('')
-  if ($texts.Count -gt 1) {
-    [void]$sb.AppendLine('## Progress notes along the way'); [void]$sb.AppendLine('')
-    for ($k = 0; $k -lt $texts.Count - 1; $k++) { [void]$sb.AppendLine('- ' + ((Clip $texts[$k] 400) -replace "`r?`n", ' ')) }
-    [void]$sb.AppendLine('')
-  }
-  [void]$sb.AppendLine('## Final reply'); [void]$sb.AppendLine(''); [void]$sb.AppendLine((Clip $reply 12000)); [void]$sb.AppendLine('')
-  [void]$sb.AppendLine("## Files changed ($($edited.Count))"); [void]$sb.AppendLine('')
-  foreach ($k in $edited.Keys) { [void]$sb.AppendLine("- $k ($($edited[$k]))") }
-  if ($edited.Count -eq 0) { [void]$sb.AppendLine('- none') }
-  [void]$sb.AppendLine('')
-  [void]$sb.AppendLine("## Commands run ($($commands.Count))"); [void]$sb.AppendLine('')
-  if ($commands.Count -gt 0) {
-    [void]$sb.AppendLine('```')
-    foreach ($cmd in $commands) { [void]$sb.AppendLine($cmd) }
-    [void]$sb.AppendLine('```')
-  } else { [void]$sb.AppendLine('- none') }
-  [void]$sb.AppendLine('')
-  [void]$sb.AppendLine("## Errors ($($errors.Count))"); [void]$sb.AppendLine('')
-  foreach ($er in $errors) { [void]$sb.AppendLine($er) }
-  if ($errors.Count -eq 0) { [void]$sb.AppendLine('- none') }
-  $md = $sb.ToString()
+  # --- skip a turn that was already written (duplicate hook run) ---
+  $turnKey = Sha1Hex ("$($hook.session_id)|$prompt|$reply")
+  $keyFile = Join-Path $handoff '.last-turn'
+  $duplicate = (Test-Path -LiteralPath $keyFile) -and ([System.IO.File]::ReadAllText($keyFile).Trim() -eq $turnKey)
+  if (-not $duplicate) {
 
-  # --- write outputs ---
-  [System.IO.File]::WriteAllText((Join-Path $handoff 'last.md'), $md, $utf8)
-  $hist = Join-Path $handoff 'history.md'
-  [System.IO.File]::AppendAllText($hist, "`n`n---`n`n" + $md, $utf8)
-  if ((Get-Item -LiteralPath $hist).Length -gt 600KB) {
-    $h = [System.IO.File]::ReadAllText($hist, $utf8)
-    [System.IO.File]::WriteAllText($hist, $h.Substring($h.Length - 400000), $utf8)
-  }
-  if ($all) { [System.IO.File]::WriteAllText((Join-Path $handoff 'transcript.jsonl'), $all, $utf8) }
+    # --- build the markdown ---
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.AppendLine('# Claude Code - latest turn')
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("- **When:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+    [void]$sb.AppendLine("- **Session:** $($hook.session_id)")
+    [void]$sb.AppendLine("- **Working dir:** $($hook.cwd)")
+    if ($toolCounts.Count -gt 0) {
+      $summary = ($toolCounts.GetEnumerator() | Sort-Object Value -Descending | ForEach-Object { "$($_.Key) x$($_.Value)" }) -join ', '
+      [void]$sb.AppendLine("- **Tools used:** $summary")
+    }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine('## Prompt'); [void]$sb.AppendLine(''); [void]$sb.AppendLine((Clip $prompt 6000)); [void]$sb.AppendLine('')
+    if ($texts.Count -gt 1) {
+      [void]$sb.AppendLine('## Progress notes along the way'); [void]$sb.AppendLine('')
+      for ($k = 0; $k -lt $texts.Count - 1; $k++) { [void]$sb.AppendLine('- ' + ((Clip $texts[$k] 400) -replace "`r?`n", ' ')) }
+      [void]$sb.AppendLine('')
+    }
+    [void]$sb.AppendLine('## Final reply'); [void]$sb.AppendLine(''); [void]$sb.AppendLine((Clip $reply 12000)); [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("## Files changed ($($edited.Count))"); [void]$sb.AppendLine('')
+    foreach ($k in $edited.Keys) { [void]$sb.AppendLine("- $k ($($edited[$k]))") }
+    if ($edited.Count -eq 0) { [void]$sb.AppendLine('- none') }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("## Commands run ($($commands.Count))"); [void]$sb.AppendLine('')
+    if ($commands.Count -gt 0) {
+      [void]$sb.AppendLine('```')
+      foreach ($cmd in $commands) { [void]$sb.AppendLine($cmd) }
+      [void]$sb.AppendLine('```')
+    } else { [void]$sb.AppendLine('- none') }
+    [void]$sb.AppendLine('')
+    [void]$sb.AppendLine("## Errors ($($errors.Count))"); [void]$sb.AppendLine('')
+    foreach ($er in $errors) { [void]$sb.AppendLine($er) }
+    if ($errors.Count -eq 0) { [void]$sb.AppendLine('- none') }
+    $md = $sb.ToString()
+
+    # --- write outputs ---
+    [System.IO.File]::WriteAllText((Join-Path $handoff 'last.md'), $md, $utf8)
+    $hist = Join-Path $handoff 'history.md'
+    [System.IO.File]::AppendAllText($hist, "`n`n---`n`n" + $md, $utf8)
+    if ((Get-Item -LiteralPath $hist).Length -gt 600KB) {
+      $h = [System.IO.File]::ReadAllText($hist, $utf8)
+      [System.IO.File]::WriteAllText($hist, $h.Substring($h.Length - 400000), $utf8)
+    }
+    [System.IO.File]::WriteAllText($keyFile, $turnKey, $utf8)
+    if ($all) {
+      try { [System.IO.File]::WriteAllText((Join-Path $handoff 'transcript.jsonl'), $all, $utf8) } catch { }
+    }
+  }   # end if (-not $duplicate)
 }
 catch {
   try {
-    if (-not $handoff) { exit 0 }
-    $log = Join-Path $handoff 'hook-error.log'
-    [System.IO.File]::AppendAllText($log, "$(Get-Date -Format s) $($_.Exception.Message) (line $($_.InvocationInfo.ScriptLineNumber))`r`n", $utf8)
+    if ($handoff) {
+      $log = Join-Path $handoff 'hook-error.log'
+      [System.IO.File]::AppendAllText($log, "$(Get-Date -Format s) $($_.Exception.Message) (line $($_.InvocationInfo.ScriptLineNumber))`r`n", $utf8)
+    }
   } catch {}
+}
+finally {
+  if ($mutex) {
+    if ($locked) { try { $mutex.ReleaseMutex() } catch {} }
+    try { $mutex.Dispose() } catch {}
+  }
 }
 exit 0

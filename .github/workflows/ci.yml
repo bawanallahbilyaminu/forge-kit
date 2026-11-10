@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON files
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $failed = 0
+          $files = @(git ls-files '*.json' '*.json.template')
+          foreach ($f in $files) {
+            try { $null = [System.IO.File]::ReadAllText((Resolve-Path $f)) | ConvertFrom-Json; Write-Host "ok   $f" }
+            catch { Write-Host "FAIL $f : $($_.Exception.Message)"; $failed++ }
+          }
+          Write-Host "$($files.Count) JSON file(s) checked, $failed failed."
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Check plugin versions match marketplace.json
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $m = Get-Content -Raw .claude-plugin/marketplace.json | ConvertFrom-Json
+          $failed = 0
+          foreach ($p in $m.plugins) {
+            $pj = Get-Content -Raw (Join-Path $p.source '.claude-plugin/plugin.json') | ConvertFrom-Json
+            if ($pj.version -ne $p.version) { Write-Host "FAIL $($p.name): marketplace $($p.version), plugin.json $($pj.version)"; $failed++ }
+            else { Write-Host "ok   $($p.name) $($pj.version)" }
+          }
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Parse-check PowerShell (Windows PowerShell 5.1)
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-powershell.ps1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Claude Code CLI
+        shell: bash
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugins and marketplace
+        shell: bash
+        run: |
+          set -e
+          claude --version
+          claude plugin validate .claude-plugin/marketplace.json
+          for p in plugins/*/.claude-plugin/plugin.json; do claude plugin validate "$p"; done
+
+      - name: Build .plugin files
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-plugins.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plugins
+          path: dist/*.plugin

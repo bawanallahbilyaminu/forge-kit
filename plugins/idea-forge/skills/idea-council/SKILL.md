@@ -7,7 +7,7 @@ description: >
   idea, an advocate who answers them, and a judge who gives a Build / Build with changes /
   Don't build verdict.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Idea Council: brutal critique and verdict

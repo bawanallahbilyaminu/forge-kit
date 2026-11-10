@@ -18,8 +18,11 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 |---|---|
 | Validate a plugin | `claude plugin validate plugins/<name>/.claude-plugin/plugin.json` |
 | Validate the marketplace | `claude plugin validate .claude-plugin/marketplace.json` |
-| Build `.plugin` files | `powershell -File scripts/build-plugins.ps1` (writes `dist/`, created in M0) |
-| Parse-check a .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
+| Build `.plugin` files | `powershell -File scripts/build-plugins.ps1` (writes `dist/`) |
+| Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
+| Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
+
+CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, `claude plugin validate` and the build.
 
 ## Rules for this repo
 - **Skills are instructions for Claude.** Write them in the imperative ("Read the file", not "You should read"). Keep each SKILL.md under about 3,000 words and move detail into `references/`. Frontmatter descriptions say when the skill is used, with trigger phrases.
