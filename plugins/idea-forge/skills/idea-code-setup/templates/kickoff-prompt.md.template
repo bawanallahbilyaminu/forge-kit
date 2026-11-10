@@ -1,0 +1,22 @@
+# Kickoff: {{Project name}}
+
+You're starting a new project. All the planning is already done in `docs/`. Your job in this session is **set-up and milestone M0 only**.
+
+1. **Read first:** `CLAUDE.md`, `docs/README.md`, `docs/00-ideation/refined-concept.md`, `docs/03-requirements/srs.md`, `docs/04-architecture/sdd.md`, `docs/04-architecture/adr/0001-stack-choice.md` and `docs/07-project/roadmap.md`. Follow CLAUDE.md, especially the Git workflow.
+2. **Check before doing anything:** run `gh auth status`. If GitHub CLI isn't signed in, stop and tell me to run `gh auth login`.
+3. **Git and GitHub:**
+   - If this folder isn't a git repo yet, run `git init -b main`.
+   - Create the private repo with `gh repo create {{slug}} --private --source . --remote origin --description "{{pitch}}"`. If a repo with that name already exists on my account, stop and ask me what to do.
+4. **First commit:** commit the existing docs and config as `docs: add project documentation and Claude Code setup`, then run `git push -u origin main`.
+5. **M0, {{M0 title}}:** create the branch `m0-scaffold`, then build:
+{{M0 deliverables from the roadmap, as a bullet list, for example: project scaffold for the stack, lint and format config, test framework with one passing test, a GitHub Actions CI workflow running lint and tests, and a README with setup steps.}}
+   - Commit after each meaningful step and push after each commit.
+   - When M0 is done, open a PR with `gh pr create`. List what was delivered and how it was tested. Don't merge it.
+6. **Report back:**
+   - the repo URL
+   - what was created
+   - the CI status
+   - the PR link
+   - anything blocked
+   - what M1 needs first
+   - a **Your steps** list of anything only I can do

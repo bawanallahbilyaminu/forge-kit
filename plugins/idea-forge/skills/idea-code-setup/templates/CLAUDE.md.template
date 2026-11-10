@@ -1,0 +1,52 @@
+# {{Project name}}
+
+{{One-line pitch.}}
+
+## Where things are
+- `docs/README.md`: index of all planning documents. Read the relevant ones before changing behaviour.
+- Requirements: `docs/03-requirements/srs.md` (`FR-xx`, `NFR-xx`) and `urs.md` (`UR-xx`)
+- Design: `docs/04-architecture/sdd.md`, `data-design.md`, `api-spec.md`, `adr/`
+- UX: `docs/05-ux/`. Tests: `docs/06-quality/`. Plan: `docs/07-project/roadmap.md` and `wbs.md`
+- Code: `src/`. Tests: `tests/`
+
+## Stack and commands
+{{Stack summary, from the SDD and ADR-0001.}}
+
+| Task | Command |
+|---|---|
+| Install | {{...}} |
+| Run | {{...}} |
+| Test | {{...}} |
+| Lint / format | {{...}} |
+| Build | {{...}} |
+
+## Milestones
+{{M0 to Mn, one line each, from the roadmap. Mark the current one.}}
+
+## Working rules
+- Build what the docs say. If something in the docs is wrong or missing, say so, then update the doc in the same change. Docs and code must not drift apart.
+- Reference requirement IDs (`FR-xx`, `NFR-xx`) in commit messages, PR descriptions and test names.
+- When a requirement or design changes, update the SRS, SDD and `traceability-matrix.md` too.
+- Write or update tests with every functional change. Run the tests before committing.
+- Use synthetic test data only. Never commit real personal data, tokens or secrets. Use `.env` (gitignored) and keep `.env.example` current.
+- Ask before adding a major dependency or changing the stack, and record the decision as a new ADR.
+
+## Git workflow (always)
+- **Commit after every meaningful change**: a working step, a passing test, a fixed bug, a doc update or a config change. Don't batch unrelated work, and don't leave a turn with meaningful uncommitted work.
+- **Push immediately after every commit.**
+- Use Conventional Commits: `feat(FR-12): ...`, `fix: ...`, `docs: ...`, `test: ...`, `chore: ...`, `ci: ...`.
+- Work on a branch per milestone (`m1-<short-name>`), and open one PR per milestone with `gh pr create`. The PR description lists the FRs delivered and how they were tested.
+- Never merge PRs yourself. The user reviews and merges.
+- Never force-push, `reset --hard`, rewrite published history or delete branches you didn't create.
+- The repo is private on GitHub (`{{owner}}/{{slug}}`).
+- A Stop hook (`.claude/hooks/git-guard.ps1`) checks for uncommitted or unpushed work at the end of each turn.
+
+## Reporting back
+End each turn with:
+- what changed, with the files and FR IDs
+- the test and CI results
+- the commits and pushes made
+- anything blocked
+- a **Your steps** list of anything only the user can do (merge a PR, add a secret, make a decision), with exact instructions
+
+The planning chat reads this through `.claude/handoff/`.

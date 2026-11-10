@@ -1,0 +1,6 @@
+.claude/settings.local.json
+.claude/handoff/
+dist/
+*.plugin
+.DS_Store
+Thumbs.db
