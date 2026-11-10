@@ -4,7 +4,7 @@ This repo is a plugin marketplace with two plugins for people who plan with Clau
 - **idea-forge** takes an idea through council, refine, launch and code setup.
 - **code-handoff** is a two-way handoff between a planning chat and Claude Code.
 
-See `README.md` for the user view, `docs/architecture.md` for how the pieces fit, and `docs/roadmap.md` for milestones and known issues.
+See `README.md` for the user view, `docs/architecture.md` for how the pieces fit, and `docs/roadmap.md` for milestones and known issues, and `CHANGELOG.md` for changes.
 
 ## Layout
 - `.claude-plugin/marketplace.json`: lists the plugins. Keep versions in sync with each `plugin.json`.
@@ -46,7 +46,7 @@ The code-handoff `hooks/hooks.json` command must stay valid as both sh and Power
   - Hooks must always exit 0 unless they intentionally block with exit code 2.
 - **Hooks must never break a user's session.** Wrap everything in try/catch and log failures to the handoff folder, not to the console.
 - **Paths:** use `${CLAUDE_PLUGIN_ROOT}` in plugin hooks. Never hardcode a user's path. idea-forge resolves the projects folder through `references/projects-folder.md` in each skill. The source is the copy in `idea-launch`; edit it there, copy it to the other skills, and run `scripts/check-shared-refs.ps1`. A skill never reads files from a sibling skill. `C:\Projects-Windows` appears only as the stated Windows default.
-- **Bump versions** in `plugin.json` and `marketplace.json` for any user-visible change, and note the change in `docs/roadmap.md` under Changelog.
+- **Bump versions** in `plugin.json` and `marketplace.json` for any user-visible change, and note the change in `CHANGELOG.md` under `[Unreleased]` (Keep a Changelog format).
 - **No personal data** in the repo, such as emails, tokens, client names or real project data.
 
 ## Git workflow (always)
