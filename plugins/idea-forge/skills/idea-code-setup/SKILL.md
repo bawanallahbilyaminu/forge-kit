@@ -7,7 +7,7 @@ description: >
   that enforces commit-and-push, a .gitignore and a kickoff prompt that has Claude Code create a
   private GitHub repo and start milestone M0.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Idea Code Setup: ready for Claude Code

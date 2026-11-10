@@ -6,7 +6,7 @@ description: >
   It runs a council of builder agents that turn a judged idea into one refined concept, works in the
   critics' points, and iterates with the user until they approve it.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Idea Refine: builders' council

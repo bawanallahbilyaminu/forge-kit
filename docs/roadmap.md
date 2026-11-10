@@ -1,6 +1,6 @@
 # Roadmap
 
-## M0: Repo and release tooling (current)
+## M0: Repo and release tooling (done in 0.1.1, PR `m0-repo-tooling`)
 - Initialise git and create the private GitHub repo `forge-kit`. Push.
 - Fill in `<owner>` in the README files with the real GitHub owner.
 - Make both plugins and the marketplace pass `claude plugin validate`.
@@ -27,9 +27,11 @@
 - The user makes the repo public.
 
 ## Known issues
-- The planning app can't write inside a project's `.claude/` folder unless that folder itself is connected. idea-code-setup therefore stages its files in `setup/dot-claude/`, and the kickoff moves them. Fixed in the repo after 0.1.0; bump to 0.1.1 in M0.
-- `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` and `install.ps1` haven't run yet.
+- The planning app can't write inside a project's `.claude/` folder unless that folder itself is connected. idea-code-setup therefore stages its files in `setup/dot-claude/`, and the kickoff moves them. Shipped in 0.1.1.
+- `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. `install.ps1` hasn't run yet (its source paths were checked in M0).
+- The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 - The handoff hook can be installed twice (plugin and installer), and then every turn is written twice.
 
 ## Changelog
 - 0.1.0: first version, built in a planning chat and moved into this repo.
+- 0.1.1: idea-code-setup stages the `.claude/` files in `setup/dot-claude/` for the kickoff to move. The install instructions name the real GitHub owner, the idea-forge README has an install line, and the stale `handoff-kit\install.ps1` references now point at `installers\windows\install.ps1`. New repo tooling: `scripts/build-plugins.ps1`, `scripts/check-powershell.ps1` and GitHub Actions CI.

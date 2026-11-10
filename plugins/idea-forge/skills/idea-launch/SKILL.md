@@ -7,7 +7,7 @@ description: >
   structure, and writes the full documentation set for the idea's type (URS, SRS, BRD, PRD, SDD,
   data design, wireframes, test plan, WBS and more for software).
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Idea Launch: project folder and documentation
