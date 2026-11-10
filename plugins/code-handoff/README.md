@@ -30,7 +30,7 @@ Older projects may still have their own copy of the handoff, from before it was 
 
 | Leftover | What to do |
 |---|---|
-| A Stop hook that runs `handoff.ps1` in `.claude/settings.json` or `.claude/settings.local.json` | Remove only that hook entry. Keep the file's other settings and any other hooks, such as a git guard. While this hook is there, the plugin skips each turn so it isn't written twice, and if the hook's script is gone, no turns are written at all. |
+| A Stop hook that runs `handoff.ps1` in `.claude/settings.json` or `.claude/settings.local.json` | Remove only that hook entry. Keep the file's other settings and any other hooks, such as a git guard. While the hook and its script are both there, the plugin skips each turn so it isn't written twice. If the hook points to a script that no longer exists, the plugin writes the turns itself and notes the stale entry once in `hook-error.log`. The stale hook still fails on every turn until you remove it. |
 | `.claude/commands/next.md` | Delete it. The plugin provides `/code-handoff:next`. |
 | `.claude/hooks/handoff.ps1` | Delete it, after removing the hook entry that runs it. Leave other files in `.claude/hooks/`. |
 | `.claude/handoff-kit/` | Delete the folder. |
