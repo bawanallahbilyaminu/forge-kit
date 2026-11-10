@@ -16,6 +16,10 @@ function Clip($s, $n) {
   if ($s.Length -gt $n) { return $s.Substring(0, $n) + ' ...[truncated]' }
   return $s
 }
+function Sha1Hex($text) {
+  $sha = [System.Security.Cryptography.SHA1]::Create()
+  return ([BitConverter]::ToString($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes([string]$text)))) -replace '-', ''
+}
 function TextOf($content) {
   if ($null -eq $content) { return '' }
   if ($content -is [string]) { return $content }
@@ -35,6 +39,10 @@ try {
   New-Item -ItemType Directory -Force -Path $handoff | Out-Null
   $gi = Join-Path $handoff '.gitignore'
   if (-not (Test-Path -LiteralPath $gi)) { [System.IO.File]::WriteAllText($gi, "*`n", $utf8) }
+
+  # Serialise runs for this project: Claude Code can fire the Stop hook twice for one turn.
+  $mutex = New-Object System.Threading.Mutex($false, ('Local\claude-handoff-' + (Sha1Hex $handoff.ToLowerInvariant())))
+  try { $null = $mutex.WaitOne(30000) } catch { }   # an abandoned mutex still counts as acquired
 
   Start-Sleep -Seconds 2   # the transcript is written asynchronously; give it a moment
 
@@ -120,6 +128,11 @@ try {
   if (-not $reply -and $texts.Count -gt 0) { $reply = $texts[$texts.Count - 1] }
   if (-not $prompt) { $prompt = '(not found in transcript)' }
 
+  # --- skip a turn that was already written (duplicate hook run) ---
+  $turnKey = Sha1Hex ("$($hook.session_id)|$prompt|$reply")
+  $keyFile = Join-Path $handoff '.last-turn'
+  if ((Test-Path -LiteralPath $keyFile) -and ([System.IO.File]::ReadAllText($keyFile).Trim() -eq $turnKey)) { exit 0 }
+
   # --- build the markdown ---
   $sb = New-Object System.Text.StringBuilder
   [void]$sb.AppendLine('# Claude Code - latest turn')
@@ -163,7 +176,10 @@ try {
     $h = [System.IO.File]::ReadAllText($hist, $utf8)
     [System.IO.File]::WriteAllText($hist, $h.Substring($h.Length - 400000), $utf8)
   }
-  if ($all) { [System.IO.File]::WriteAllText((Join-Path $handoff 'transcript.jsonl'), $all, $utf8) }
+  [System.IO.File]::WriteAllText($keyFile, $turnKey, $utf8)
+  if ($all) {
+    try { [System.IO.File]::WriteAllText((Join-Path $handoff 'transcript.jsonl'), $all, $utf8) } catch { }
+  }
 }
 catch {
   try {

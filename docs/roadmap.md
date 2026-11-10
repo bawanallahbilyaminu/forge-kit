@@ -33,5 +33,6 @@
 - The handoff hook can be installed twice (plugin and installer), and then every turn is written twice.
 
 ## Changelog
+- 0.1.1 (unreleased): handoff.ps1 serialises concurrent runs with a mutex and skips a turn it has already written. Claude Code was seen firing the Stop hook twice for one turn, which wrote duplicate history entries and caused a lock error on transcript.jsonl.
 - 0.1.0: first version, built in a planning chat and moved into this repo.
 - 0.1.1: idea-code-setup stages the `.claude/` files in `setup/dot-claude/` for the kickoff to move. The install instructions name the real GitHub owner, the idea-forge README has an install line, and the stale `handoff-kit\install.ps1` references now point at `installers\windows\install.ps1`. New repo tooling: `scripts/build-plugins.ps1`, `scripts/check-powershell.ps1` and GitHub Actions CI.
