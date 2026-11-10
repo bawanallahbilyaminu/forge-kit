@@ -9,7 +9,7 @@ The handoff folder ignores itself in git.
 
 ## Install
 Install it in one of two ways. Don't do both, or every turn gets written twice.
-- **As a Claude Code plugin:** run `/plugin marketplace add <owner>/forge-kit`, then `/plugin install code-handoff@forge-kit`. The hook and `/next` then work in every project.
+- **As a Claude Code plugin:** run `/plugin marketplace add bawanallahbilyaminu/forge-kit`, then `/plugin install code-handoff@forge-kit`. The hook and `/next` then work in every project.
 - **Without plugins (Windows):** run `powershell -ExecutionPolicy Bypass -File installers\windows\install.ps1` from the repo. This copies the hook and `/next` into `%USERPROFILE%\.claude`.
 
 For the planning side, install the plugin in the Claude app as well. In each planning chat, add the project's `.claude` folder with **+ → Add folder**.
