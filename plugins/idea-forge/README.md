@@ -27,4 +27,4 @@ Each stage reads the previous stage's file, so you can continue in a different c
 ## Requirements
 - The Claude desktop app, with `C:\Projects-Windows` connected. The first command asks for access.
 - GitHub CLI (`gh`) signed in on your computer. Claude Code uses it to create the repo.
-- The handoff kit installed once (`handoff-kit\install.ps1`). It gives `/next` and `/code-handoff`.
+- code-handoff installed once, either as the plugin or with the Windows installer (`installers\windows\install.ps1` in forge-kit), but not both. It gives `/next` and `/code-handoff`.
