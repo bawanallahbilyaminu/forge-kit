@@ -5,7 +5,7 @@ All notable changes to forge-kit are recorded here. The format follows [Keep a C
 **Version numbers:**
 - A release is named after the marketplace version in `.claude-plugin/marketplace.json`.
 - Each plugin also has its own version, in its `plugin.json`.
-- Versions before 0.5.0 were never released publicly. They are kept below as the project's history.
+- Versions before 0.5.0 were never released publicly and have no tags. They are kept below as the project's history.
 
 ## [Unreleased]
 
@@ -175,3 +175,6 @@ Marketplace 0.1.1 and both plugins 0.1.1.
 ## [0.1.0] - 2026-11-10
 
 First version, built in a planning chat and moved into this repo.
+
+[Unreleased]: https://github.com/bawanallahbilyaminu/forge-kit/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bawanallahbilyaminu/forge-kit/releases/tag/v0.5.0
