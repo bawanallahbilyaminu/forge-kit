@@ -9,6 +9,13 @@ Four commands that take an idea from a conversation to a ready-to-build project.
 | `/idea-launch` | Creates `C:\Projects-Windows\<slug>\` and writes the documentation set for the idea's type: the full SE set for software, or a fitting set for content, services, research, hardware or programmes. | `C:\Projects-Windows\<slug>\docs\` |
 | `/idea-code-setup` | Adds CLAUDE.md, Claude Code settings, a git guard hook and a kickoff prompt. On its first run, Claude Code creates a private GitHub repo and then commits and pushes after every meaningful change. | `C:\Projects-Windows\<slug>\` |
 
+## Install
+In Claude Code (2.1.275 or later):
+```
+/plugin install idea-forge --marketplace bawanallahbilyaminu/forge-kit
+```
+On older versions, run `/plugin marketplace add bawanallahbilyaminu/forge-kit` and then `/plugin install idea-forge@forge-kit`. In the Claude app, install it from the `.plugin` file on the Releases page.
+
 ## How to use it
 1. Describe your idea in a chat, then type `/idea-council`.
 2. If the verdict is Build or Build with changes, type `/idea-refine`. Push back until you're happy, then say "approve".
