@@ -19,8 +19,10 @@
 Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests before it's ported. Decided in the planning chat on 2026-11-10.
 
 ## M2: macOS and Linux
-- A bash version of `handoff.sh` and `git-guard.sh` that needs only POSIX tools plus `jq`, or a single Node script if that's simpler. Record the choice in an ADR.
-- `hooks.json` picks the right script for each platform.
+- [x] Choose between POSIX tools plus `jq` and a single Node script per hook, and record the choice in an ADR. Done: `docs/adr/0001-cross-platform-hooks.md` picks Node (18+, built-in modules only) for macOS and Linux and keeps PowerShell on Windows.
+- [x] git-guard for macOS and Linux. Done in idea-forge 0.4.0: `idea-code-setup/templates/git-guard.mjs` and `settings.posix.json.template`. Its node:test tests (`tests/git-guard/git-guard.test.mjs`) use the same cases as the Pester tests and run in CI on `ubuntu-latest` (Node 18 and 22) and `macos-latest` (Node 22).
+- [ ] handoff for macOS and Linux (`handoff.mjs`), with tests ported from `tests/handoff/handoff.Tests.ps1`.
+- [ ] The code-handoff `hooks.json` picks the right script for each platform.
 
 ## M3: Tests
 - [x] Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript. Done on branch `m3-tests`: `tests/handoff/handoff.Tests.ps1` (Pester 3.4.0) also covers duplicate runs, the lock timeout, the home-folder skip, and the leftovers and stale-hook cases from code-handoff 0.2.2. Run it with `scripts/run-tests.ps1`, which CI also runs.
@@ -35,6 +37,11 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 ## Changelog
+- 0.4.0 (marketplace), idea-forge 0.4.0:
+  - `/idea-code-setup` supports macOS and Linux. It picks the platform from the projects folder path. On macOS and Linux a new project gets `.claude/hooks/git-guard.mjs`, a Node 18+ script with no packages, and the Stop hook from `settings.posix.json.template`: `if command -v node >/dev/null 2>&1; then node "$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.mjs"; fi`. Exit 2 still blocks, and without Node the hook exits 0. Windows projects get exactly the same files as before.
+  - `git-guard.mjs` has the same behaviour and messages as `git-guard.ps1`. The "Do these first" list asks macOS and Linux users to check `node --version`. The CLAUDE.md template names the platform's git guard file.
+  - ADR 0001 (`docs/adr/0001-cross-platform-hooks.md`) records the choice of Node over sh plus `jq` for the macOS and Linux hooks.
+  - CI has a `posix` job on `ubuntu-latest` (Node 18 and 22) and `macos-latest` (Node 22). It runs the node:test tests, which cover the same 16 cases as the Pester tests, check that the two settings templates differ only in the hook command, and check the `sh` hook command with and without Node. The `windows-latest` job is unchanged.
 - 0.3.3 (marketplace), code-handoff 0.2.3:
   - Fixed a race on a project's first run, found by the M3 tests. When two runs started at the same moment in a project with no `.claude/handoff/` folder yet, both created `.gitignore` before taking the mutex. The loser logged a spurious "being used by another process" error to `hook-error.log` and exited, although the turn was still written once. Now, if that write fails and the file exists, the error is ignored. Any other failure is still logged. The test for it is no longer skipped, and it passed 10 times out of 10 in a loop. The same loop against 0.2.2 failed 1 time in 10, and 4 in 6 when the race was first found.
 - 0.3.2 (marketplace), code-handoff 0.2.2:

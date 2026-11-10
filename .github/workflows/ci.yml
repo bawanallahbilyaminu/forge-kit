@@ -84,3 +84,31 @@ jobs:
         with:
           name: plugins
           path: dist/*.plugin
+
+  # macOS and Linux: the Node versions of the hooks (docs/adr/0001-cross-platform-hooks.md).
+  # Node 18 is the oldest version the hooks support; 22 is the current LTS line used elsewhere.
+  posix:
+    name: posix (${{ matrix.os }}, node ${{ matrix.node }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '22'
+          - os: macos-latest
+            node: '22'
+          - os: ubuntu-latest
+            node: '18'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: git-guard tests (node:test)
+        run: |
+          node --version
+          git --version
+          node --test tests/git-guard/git-guard.test.mjs

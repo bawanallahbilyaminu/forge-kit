@@ -23,9 +23,15 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
 | Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
 | Run the Pester tests | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1` (add `-Path tests/handoff` for one folder). Uses Pester 3.4.0, which ships with Windows PowerShell 5.1, so there's nothing to install. Takes about 2 minutes, because each hook run waits 2 seconds and the lock test waits 30. |
+| Run the Node hook tests (macOS/Linux hooks, any OS) | `node --test tests/git-guard/git-guard.test.mjs` (Node 18+, nothing to install). The two `sh` hook-command tests are skipped on Windows. |
 | Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
 
-CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, `claude plugin validate` and the build.
+CI (`.github/workflows/ci.yml`) has two jobs:
+- **`check`** (`windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, `claude plugin validate` and the build.
+- **`posix`** (`ubuntu-latest` with Node 18 and 22, and `macos-latest` with Node 22) runs the Node hook tests.
+
+## Hooks on each platform
+Each hook has a PowerShell version for Windows and a Node version for macOS and Linux (`docs/adr/0001-cross-platform-hooks.md`). Both must behave the same and print the same messages. A behaviour change updates both scripts and both test files (`*.Tests.ps1` and `*.test.mjs`) in the same commit.
 
 ## Rules for this repo
 - **Skills are instructions for Claude.** Write them in the imperative ("Read the file", not "You should read"). Keep each SKILL.md under about 3,000 words and move detail into `references/`. Frontmatter descriptions say when the skill is used, with trigger phrases.
