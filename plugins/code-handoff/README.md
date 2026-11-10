@@ -25,5 +25,17 @@ Pick one way to install it on the Claude Code side. Both give you the same hook 
 
 For the planning side, install the plugin in the Claude app as well. In each planning chat, add the project's `.claude` folder with **+ → Add folder**.
 
+## Upgrading from the per-project setup
+Older projects may still have their own copy of the handoff, from before it was installed once for all projects. Leftovers show up as a second `/next (project)` command next to `/code-handoff:next`, and the plugin notes them once in `.claude/handoff/hook-error.log`.
+
+| Leftover | What to do |
+|---|---|
+| A Stop hook that runs `handoff.ps1` in `.claude/settings.json` or `.claude/settings.local.json` | Remove only that hook entry. Keep the file's other settings and any other hooks, such as a git guard. While the hook and its script are both there, the plugin skips each turn so it isn't written twice. If the hook points to a script that no longer exists, the plugin writes the turns itself and notes the stale entry once in `hook-error.log`. The stale hook still fails on every turn until you remove it. |
+| `.claude/commands/next.md` | Delete it. The plugin provides `/code-handoff:next`. |
+| `.claude/hooks/handoff.ps1` | Delete it, after removing the hook entry that runs it. Leave other files in `.claude/hooks/`. |
+| `.claude/handoff-kit/` | Delete the folder. |
+
+Don't touch `.claude/handoff/`: it holds the turn summaries and `next.md`. Restart Claude Code (`claude --continue`) after editing settings. The plugin never deletes anything itself.
+
 ## Platform support
 The hook is PowerShell, so it runs on Windows only for now. A bash version for macOS and Linux is on the roadmap.
