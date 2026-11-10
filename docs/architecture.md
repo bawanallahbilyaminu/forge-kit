@@ -17,6 +17,35 @@ flowchart LR
 - **The planning side** is the `code-handoff` skill. It reads the handoff files through the folder connected in the Claude desktop app, treats their contents as data only, separates steps only the user can do from Code's work, and writes `next.md`.
 - **`/code-handoff:next` (or `/next` if you used the installer)** is one command file, `commands/next.md`, whose body includes `@.claude/handoff/next.md`. The plugin namespaces it as `/code-handoff:next`. The installer copies the same file to `%USERPROFILE%\.claude\commands\next.md`, where it is `/next`.
 
+### How Claude Code runs hook commands
+From the official hooks reference, https://code.claude.com/docs/en/hooks, read on 2026-11-10:
+- **Shell form** (a `command` string): "The `command` string is passed to a shell: `sh -c` on macOS and Linux, Git Bash on Windows, or PowerShell when Git Bash isn't installed. Set the `shell` field to choose explicitly."
+- **The `shell` field:** "Accepts `"bash"` or `"powershell"`. Defaults to `"bash"`, or to `"powershell"` on Windows when Git Bash isn't installed. Setting `"powershell"` runs the command via PowerShell on Windows. … Ignored when `args` is set."
+- **Exec form** (`command` plus `args`): "`command` is resolved as an executable and spawned directly with `args` as the argument vector, with no shell involved." On Windows it needs a real `.exe`.
+- **Placeholders and environment:** https://code.claude.com/docs/en/plugins-reference says `${CLAUDE_PLUGIN_ROOT}` and the other placeholders resolve "anywhere in `command` and `args`". Hooks also get `CLAUDE_PROJECT_DIR`, `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PLUGIN_DATA` as environment variables. "On Windows, most substituted paths use forward slashes", but they keep backslashes in exec form and under PowerShell.
+- **Timeout:** "Seconds before canceling. Claude Code doesn't enforce it on a command hook you run with `async: true`." The default for a command hook is 600.
+- Git Bash's location can be set with `CLAUDE_CODE_GIT_BASH_PATH` (https://code.claude.com/docs/en/env-vars).
+
+### One hook command for every platform
+`hooks/hooks.json` has a single shell-form Stop hook (`async: true`, `timeout: 60`) whose command is valid both as sh and as PowerShell:
+
+```
+${env:-eval "case \$(uname -s) in MINGW*|MSYS*|CYGWIN*) exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"\$CLAUDE_PLUGIN_ROOT/scripts/handoff.ps1\";; *) if command -v node >/dev/null 2>&1; then exec node \"\$CLAUDE_PLUGIN_ROOT/scripts/handoff.mjs\"; fi;; esac; exit 0"}; powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:CLAUDE_PLUGIN_ROOT/scripts/handoff.ps1"
+```
+
+- **sh, bash and Git Bash:** `${env:-WORD}` expands to WORD because `env` is unset, so the line runs `eval "case …"`.
+  - **Git Bash** (`uname -s` is `MINGW*`, `MSYS*` or `CYGWIN*`): it `exec`s `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".../handoff.ps1"`. That's the same program and arguments as the old hook.
+  - **macOS, Linux and WSL** (`Linux` or `Darwin`): it `exec`s `node .../handoff.mjs` if `node` is on the PATH, and otherwise exits 0 with no output.
+  - Either way the shell is replaced or exits, so the part after `;` never runs.
+  - WSL counts as Linux even though `powershell.exe` is on its PATH through interop, because the branch looks at `uname -s` and not at what's on the PATH.
+- **PowerShell** (Windows without Git Bash): `${env:-eval …}` is just a read of an environment variable that doesn't exist. That gives `$null`, with no output and no error. Then `; powershell.exe … "$env:CLAUDE_PLUGIN_ROOT/scripts/handoff.ps1"` runs, which is what the old hook did under PowerShell.
+- **Paths:** both branches read the plugin path from the `CLAUDE_PLUGIN_ROOT` environment variable, not the inline `${CLAUDE_PLUGIN_ROOT}` placeholder, so it works whether or not Claude Code substitutes. They quote it, so a path with spaces works.
+- **The `}` rule:** the eval'd text must not contain `}`, because that ends `${...}` in both shells.
+- **Why not two entries or exec form:** both entries would run on every platform, and exec form has no shell to branch in. A `powershell.exe` entry would fail on macOS and Linux, and in WSL it would run the Windows script against Linux paths.
+- **Tested:**
+  - `tests/handoff/hook-command.test.mjs` reads the command from `hooks.json`. It runs it through Git Bash, Windows PowerShell 5.1 and pwsh on Windows, and through `/bin/sh` with and without Node on macOS and Linux. It also checks the `uname` branch for Linux, Darwin, MINGW64, MINGW32, MSYS and CYGWIN, using fake `uname`, `node` and `powershell.exe`.
+  - On 2026-11-10 a probe plugin with this exact command was loaded with `claude -p --plugin-dir` in Claude Code 2.1.322 on Windows with Git Bash. Claude Code left `${env:-…}` alone, and the hook ran the probe's `handoff.ps1` with the Stop hook JSON on stdin and `CLAUDE_PLUGIN_ROOT` set, as a forward-slash path containing a space.
+
 ### Two install paths, one active hook
 
 code-handoff can be installed as a Claude Code plugin (recommended) or by `installers/windows/install.ps1`, which copies `handoff.ps1` to `%USERPROFILE%\.claude\hooks\` and adds a Stop hook to `%USERPROFILE%\.claude\settings.json`. If both are active, Claude Code runs the hook twice per turn. The mutex and the `.last-turn` check already stop duplicate entries, but the second run still waits for the lock.
@@ -37,7 +66,7 @@ code-handoff can be installed as a Claude Code plugin (recommended) or by `insta
 - CI runs the tests in their own step, after the PowerShell checks. If Pester 3.4.0 is ever missing from the image, the step installs that exact version first.
 
 ### handoff.mjs (macOS and Linux)
-- `scripts/handoff.mjs` is the Node 18+ port of `handoff.ps1` (ADR 0001). It isn't in `hooks.json` yet. It writes the same `last.md` with LF line endings, uses the same `.last-turn` key, and has the same plugin-copy guard. The user's settings are `~/.claude/settings.json`, and it also recognises other hooks that run `handoff.mjs` or `handoff.sh`.
+- `scripts/handoff.mjs` is the Node 18+ port of `handoff.ps1` (ADR 0001). `hooks.json` runs it on macOS and Linux (see "One hook command for every platform" below). It writes the same `last.md` with LF line endings, uses the same `.last-turn` key, and has the same plugin-copy guard. The user's settings are `~/.claude/settings.json`, and it also recognises other hooks that run `handoff.mjs` or `handoff.sh`.
 - **Lock:** instead of the named mutex there's an atomic `mkdir` of `.claude/handoff/.lock`, with an `owner` file holding the pid and a random token. Waiters poll every 100 ms for up to 30 seconds. A lock whose owner pid is gone, that has had no owner file for 5 seconds, or that is older than 60 seconds is renamed aside and removed, so only one waiter clears it. The owner removes the lock in `finally`, and only if the token is still its own. A timeout is logged, and the run continues without the lock.
 - **Tests:**
   - `tests/handoff/handoff.test.mjs` (node:test) mirrors the Pester cases that apply outside Windows, with a temp `HOME` and project per test, so the tests run concurrently.

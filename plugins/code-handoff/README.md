@@ -38,4 +38,17 @@ Older projects may still have their own copy of the handoff, from before it was 
 Don't touch `.claude/handoff/`: it holds the turn summaries and `next.md`. Restart Claude Code (`claude --continue`) after editing settings. The plugin never deletes anything itself.
 
 ## Platform support
-The plugin's hook runs `scripts/handoff.ps1`, so it works on Windows only for now. A Node version for macOS and Linux, `scripts/handoff.mjs` (Node 18 or later, no packages), is written and tested on Linux and macOS, and it writes the same `last.md` as the PowerShell version. The next step is for the plugin's `hooks.json` to pick it on those platforms.
+The plugin has one Stop hook that picks the right script for the platform. Both scripts write the same `last.md`.
+
+| Platform | What runs | Needs |
+|---|---|---|
+| Windows, Claude Code with Git Bash (the usual setup) | `scripts/handoff.ps1` via `powershell.exe` | Windows PowerShell 5.1, which is part of Windows |
+| Windows, Claude Code without Git Bash (hooks run in PowerShell) | `scripts/handoff.ps1` via `powershell.exe` | The same |
+| macOS | `scripts/handoff.mjs` via `node` | Node 18 or later on the PATH |
+| Linux | `scripts/handoff.mjs` via `node` | Node 18 or later on the PATH |
+| WSL (Claude Code running inside WSL) | `scripts/handoff.mjs` via `node`, as on Linux | Node 18 or later inside WSL |
+
+- **Without Node** on macOS, Linux or WSL, the hook exits quietly and no turn is written. Run `node --version` to check, and install Node from nodejs.org or with your package manager.
+- **The Windows installer** (`installers/windows/install.ps1`) is Windows-only. On macOS and Linux, use the plugin.
+
+How the single hook command works on every shell is explained in "One hook command for every platform" in forge-kit's `docs/architecture.md`.

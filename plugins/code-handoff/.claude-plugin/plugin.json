@@ -1,6 +1,6 @@
 {
   "name": "code-handoff",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Two-way handoff between a planning chat and Claude Code: a Stop hook writes each Claude Code turn to .claude/handoff/, the code-handoff skill reads it and writes the next prompt, and /code-handoff:next runs it (or /next if you used the installer).",
   "author": { "name": "Bilyaminu Bawan Allah" },
   "keywords": ["claude code", "handoff", "planning", "hooks", "workflow"]

@@ -5,9 +5,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/scripts/handoff.ps1\"",
+            "command": "${env:-eval \"case \\$(uname -s) in MINGW*|MSYS*|CYGWIN*) exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File \\\"\\$CLAUDE_PLUGIN_ROOT/scripts/handoff.ps1\\\";; *) if command -v node >/dev/null 2>&1; then exec node \\\"\\$CLAUDE_PLUGIN_ROOT/scripts/handoff.mjs\\\"; fi;; esac; exit 0\"}; powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"$env:CLAUDE_PLUGIN_ROOT/scripts/handoff.ps1\"",
             "async": true,
-            "timeout": 30
+            "timeout": 60
           }
         ]
       }

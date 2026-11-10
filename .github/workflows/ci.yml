@@ -68,7 +68,7 @@ jobs:
       # handoff.ps1 (parity.test.mjs). The git-guard sh tests skip themselves on Windows.
       - name: Node hook tests, with handoff.ps1 parity
         shell: bash
-        run: node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs
+        run: node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs tests/handoff/hook-command.test.mjs
 
       - name: Install Claude Code CLI
         shell: bash
@@ -117,4 +117,4 @@ jobs:
         run: |
           node --version
           git --version
-          node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs
+          node --test tests/git-guard/git-guard.test.mjs tests/handoff/handoff.test.mjs tests/handoff/parity.test.mjs tests/handoff/hook-command.test.mjs

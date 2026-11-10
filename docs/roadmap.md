@@ -21,8 +21,8 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 ## M2: macOS and Linux
 - [x] Choose between POSIX tools plus `jq` and a single Node script per hook, and record the choice in an ADR. Done: `docs/adr/0001-cross-platform-hooks.md` picks Node (18+, built-in modules only) for macOS and Linux and keeps PowerShell on Windows.
 - [x] git-guard for macOS and Linux. Done in idea-forge 0.4.0: `idea-code-setup/templates/git-guard.mjs` and `settings.posix.json.template`. Its node:test tests (`tests/git-guard/git-guard.test.mjs`) use the same cases as the Pester tests and run in CI on `ubuntu-latest` (Node 18 and 22) and `macos-latest` (Node 22).
-- [x] handoff for macOS and Linux (`handoff.mjs`), with tests ported from `tests/handoff/handoff.Tests.ps1`. Done in code-handoff 0.3.0: `plugins/code-handoff/scripts/handoff.mjs`, with `tests/handoff/handoff.test.mjs` (36 tests) and `parity.test.mjs` (`last.md` matches `handoff.ps1`'s output for the shared fixtures). It isn't wired into `hooks.json` yet.
-- [ ] The code-handoff `hooks.json` picks the right script for each platform.
+- [x] handoff for macOS and Linux (`handoff.mjs`), with tests ported from `tests/handoff/handoff.Tests.ps1`. Done in code-handoff 0.3.0: `plugins/code-handoff/scripts/handoff.mjs`, with `tests/handoff/handoff.test.mjs` (36 tests) and `parity.test.mjs` (`last.md` matches `handoff.ps1`'s output for the shared fixtures).
+- [x] The code-handoff `hooks.json` picks the right script for each platform. Done in code-handoff 0.4.0: one shell-form hook that is valid as sh and as PowerShell. It runs `handoff.ps1` under Git Bash and under PowerShell on Windows, and `handoff.mjs` under `sh` on macOS, Linux and WSL (exiting 0 without Node). See "One hook command for every platform" in `docs/architecture.md`. Tested by `tests/handoff/hook-command.test.mjs` on all three OSes.
 
 ## M3: Tests
 - [x] Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript. Done on branch `m3-tests`: `tests/handoff/handoff.Tests.ps1` (Pester 3.4.0) also covers duplicate runs, the lock timeout, the home-folder skip, and the leftovers and stale-hook cases from code-handoff 0.2.2. Run it with `scripts/run-tests.ps1`, which CI also runs.
@@ -37,6 +37,18 @@ Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests befor
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 ## Changelog
+- 0.5.0 (marketplace), code-handoff 0.4.0:
+  - code-handoff now works on macOS, Linux and WSL. `hooks/hooks.json` has one shell-form Stop hook, still `async: true`, whose command is valid as both sh and PowerShell:
+    - In sh, bash or Git Bash, `${env:-eval "..."}` runs a `uname -s` branch. MINGW, MSYS or CYGWIN `exec`s `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".../handoff.ps1"`, the same program and arguments as before. Anything else `exec`s `node .../handoff.mjs` if Node is on the PATH, or exits 0 silently. WSL therefore counts as Linux, even though `powershell.exe` is on its PATH.
+    - Under PowerShell (Claude Code on Windows without Git Bash), the `${env:-...}` part is a silent read of a missing variable, and the old `powershell.exe ... handoff.ps1` command runs.
+    - Both branches take the plugin path from the `CLAUDE_PLUGIN_ROOT` environment variable.
+  - I checked this against the Claude Code hooks reference, which says `sh -c` on macOS and Linux, Git Bash on Windows, and PowerShell when Git Bash isn't installed. I also checked it live in Claude Code 2.1.322 on Windows with a probe plugin loaded by `--plugin-dir`.
+  - **Timeout:** raised from 30 to 60 seconds in `hooks.json` and in `install.ps1`'s hook entry, so it covers the 30-second lock wait plus the 2-second transcript wait. The lock wait in `handoff.ps1` and `handoff.mjs` is unchanged, so Windows behaves as before and the lock tests stay valid. The hooks reference says the timeout isn't enforced for `async: true` hooks anyway, so 60 is the correct value on paper and harmless in practice.
+  - **New `tests/handoff/hook-command.test.mjs`** reads the command from `hooks.json`. It checks:
+    - on Windows, that it writes the turn through `handoff.ps1` from Git Bash, Windows PowerShell 5.1 and pwsh (CRLF output proves which script ran)
+    - on macOS and Linux, that it writes the turn through `handoff.mjs` from `/bin/sh` (LF output), and exits 0 with no output and nothing written when Node isn't on the PATH
+    - the `uname` branch for Linux, Darwin, MINGW64, MINGW32, MSYS and CYGWIN
+  - The code-handoff README's platform support section covers Windows with and without Git Bash, macOS, Linux and WSL, and their requirements. The Windows installer stays Windows-only.
 - 0.4.1 (marketplace), code-handoff 0.3.0:
   - New `plugins/code-handoff/scripts/handoff.mjs`, the Node 18+ port of `handoff.ps1` for macOS and Linux, using built-in modules only. It isn't used yet: `hooks.json` still runs `handoff.ps1`, and the platform switch is the next M2 item.
   - **Ported:**
