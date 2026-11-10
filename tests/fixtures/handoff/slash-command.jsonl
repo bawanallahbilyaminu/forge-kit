@@ -1,0 +1,7 @@
+{"type": "user", "message": {"role": "user", "content": "Earlier prompt: list the files."}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Earlier reply: here are the files."}]}}
+{"type": "user", "message": {"role": "user", "content": "<command-message>code-handoff:next</command-message>\n<command-name>/code-handoff:next</command-name>"}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "Expanded command body that must not become the prompt."}]}, "isMeta": true}
+{"type": "attachment", "attachment": {}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Ran the prepared prompt."}]}}
+{"type": "user", "message": {"role": "user", "content": "<local-command-stdout>output of a local command</local-command-stdout>"}}

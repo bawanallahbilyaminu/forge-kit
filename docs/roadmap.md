@@ -16,13 +16,15 @@
 - [x] **No-context review in `/idea-launch`** (borrowed from EGM's "goldfish" reviewers). After the documents are written, spawn fresh agents that get only the finished SRS and SDD, with no chat history and no ideation files. One looks for gaps and contradictions. One checks whether Claude Code could build M0 and M1 from these documents alone. One checks traceability against the test cases. Fix what they find, or list it under Open questions, and add a short review summary to `docs/README.md`. Done in idea-forge 0.3.0: see step 6 of the idea-launch skill and `references/reviewers.md`.
 - [x] **Point new projects at EGM for big features.** In `/idea-code-setup`'s CLAUDE.md template, add a rule: before building a feature that needs architecture decisions, run the EGM workflow (`/egm:egm-brainstorm`, then `/egm:egm-draft`, then `/egm:egm-review`) if the EGM plugin is installed, and save the design under `docs/04-architecture/features/`. Mention EGM as optional in the forge-kit README, with a link to github.com/google/elephant-goldfish-model. Done in idea-forge 0.3.1: see "Designing big features" in `idea-code-setup/templates/CLAUDE.md.template`.
 
+Order: M3 (tests) comes before M2 (macOS and Linux), so the hook has tests before it's ported. Decided in the planning chat on 2026-11-10.
+
 ## M2: macOS and Linux
 - A bash version of `handoff.sh` and `git-guard.sh` that needs only POSIX tools plus `jq`, or a single Node script if that's simpler. Record the choice in an ADR.
 - `hooks.json` picks the right script for each platform.
 
 ## M3: Tests
-- Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript.
-- Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`.
+- [x] Fixture transcripts (synthetic) and Pester tests for the handoff parser: a normal turn, a turn with tool errors, an interrupted turn, a slash command turn and a lagging transcript. Done on branch `m3-tests`: `tests/handoff/handoff.Tests.ps1` (Pester 3.4.0) also covers duplicate runs, the lock timeout, the home-folder skip, and the leftovers and stale-hook cases from code-handoff 0.2.2. Run it with `scripts/run-tests.ps1`, which CI also runs.
+- [x] Pester tests for git-guard: a clean repo, a dirty repo, unpushed commits, no upstream, not a repo, and `stop_hook_active`. Done on branch `m3-tests`: `tests/git-guard/git-guard.Tests.ps1` tests the shipped template (identical to this repo's live `.claude/hooks/git-guard.ps1`). It uses temp repos with a local bare remote, and also covers counting several changes, being behind the upstream, no remote, no commits yet, the `cwd` fallback and bad JSON.
 
 ## M4: Public release
 - Polish the README with a GIF of the loop, write a CHANGELOG, tag v0.1.0, and attach the `.plugin` files to a GitHub Release.
@@ -33,6 +35,8 @@
 - `handoff.ps1` has been tested in one real project (Windows, Git Bash shell). `git-guard.ps1` is now live in this repo as its Stop hook. The plugin route (code-handoff 0.2.0 from the local marketplace, user scope) was tested live on Windows on 2026-11-10, including the double-install guard and `-Uninstall`: with both installed, the plugin copy stepped aside and wrote the one-time note in `hook-error.log`, and after `install.ps1 -Uninstall` the plugin copy wrote the turn on its own.
 - The plugins have no icon yet, so `claude plugin validate` warns `ICON_MISSING`. It needs a square PNG (512-2048 px) at `.claude-plugin/icon.png` in each plugin.
 ## Changelog
+- 0.3.3 (marketplace), code-handoff 0.2.3:
+  - Fixed a race on a project's first run, found by the M3 tests. When two runs started at the same moment in a project with no `.claude/handoff/` folder yet, both created `.gitignore` before taking the mutex. The loser logged a spurious "being used by another process" error to `hook-error.log` and exited, although the turn was still written once. Now, if that write fails and the file exists, the error is ignored. Any other failure is still logged. The test for it is no longer skipped, and it passed 10 times out of 10 in a loop. The same loop against 0.2.2 failed 1 time in 10, and 4 in 6 when the race was first found.
 - 0.3.2 (marketplace), code-handoff 0.2.2:
   - The plugin copy of `handoff.ps1` also checks the project's `.claude/settings.json` and `.claude/settings.local.json`. If either has a Stop hook running a `handoff.ps1` outside the plugin, it steps aside as it does for the installer, and notes once in `hook-error.log` which file has the hook. Before, only `%USERPROFILE%\.claude\settings.json` was checked, so an old per-project hook wrote every turn twice.
   - It also notes once any leftovers from the old per-project setup (`.claude/commands/next.md`, which shows up as a second `/next (project)` command, `.claude/hooks/handoff.ps1` and `.claude/handoff-kit/`). It never deletes them and still writes the turn.

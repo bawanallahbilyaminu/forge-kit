@@ -11,6 +11,7 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 - `plugins/idea-forge/skills/<skill>/SKILL.md`, plus `references/` and `templates/`
 - `plugins/code-handoff/`: `hooks/hooks.json`, `scripts/handoff.ps1`, `commands/next.md`, `skills/code-handoff/SKILL.md`
 - `installers/windows/install.ps1`: installs the handoff without the plugin system, using files from `plugins/code-handoff/`
+- `tests/`: Pester tests (`tests/<area>/*.Tests.ps1`) and synthetic fixtures (`tests/fixtures/`). No real transcripts, paths or personal data in fixtures.
 - `.claude/`: this repo's own Claude Code settings, the git guard hook and the handoff folder (gitignored)
 
 ## Commands
@@ -21,9 +22,10 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Build `.plugin` files | `powershell -File scripts/build-plugins.ps1` (writes `dist/`) |
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
 | Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
+| Run the Pester tests | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-tests.ps1` (add `-Path tests/handoff` for one folder). Uses Pester 3.4.0, which ships with Windows PowerShell 5.1, so there's nothing to install. Takes about 2 minutes, because each hook run waits 2 seconds and the lock test waits 30. |
 | Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
 
-CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, `claude plugin validate` and the build.
+CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, the Pester tests, `claude plugin validate` and the build.
 
 ## Rules for this repo
 - **Skills are instructions for Claude.** Write them in the imperative ("Read the file", not "You should read"). Keep each SKILL.md under about 3,000 words and move detail into `references/`. Frontmatter descriptions say when the skill is used, with trigger phrases.

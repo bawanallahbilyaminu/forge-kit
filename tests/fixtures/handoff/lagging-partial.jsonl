@@ -1,0 +1,4 @@
+{"type": "user", "message": {"role": "user", "content": "Earlier prompt: list the files."}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "Earlier reply: here are the files."}]}}
+{"type": "user", "message": {"role": "user", "content": "Write the changelog entry."}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Writing the chan
