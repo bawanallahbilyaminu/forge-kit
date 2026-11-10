@@ -31,6 +31,12 @@
 - Use synthetic test data only. Never commit real personal data, tokens or secrets. Use `.env` (gitignored) and keep `.env.example` current.
 - Ask before adding a major dependency or changing the stack, and record the decision as a new ADR.
 
+## Designing big features
+Before building a feature that needs architecture decisions (new components, data model changes, external integrations, failure handling):
+- If the EGM plugin is installed (github.com/google/elephant-goldfish-model), run its workflow: `/egm:egm-brainstorm <feature>`, then `/egm:egm-draft`, then `/egm:egm-review <draft path>`. Save the approved design as `docs/04-architecture/features/<feature>.md`.
+- If EGM isn't installed, write a short design note at the same path before coding: the problem, the options considered, the choice and why, and the FRs it serves.
+- Link the design from the SDD, and record any stack decision as an ADR.
+
 ## Git workflow (always)
 - **Commit after every meaningful change**: a working step, a passing test, a fixed bug, a doc update or a config change. Don't batch unrelated work, and don't leave a turn with meaningful uncommitted work.
 - **Push immediately after every commit.**

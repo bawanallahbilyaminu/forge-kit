@@ -20,7 +20,7 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
   - `transcript.jsonl`: raw copy of the latest session. Use it only when last.md lacks a detail, and grep it rather than reading it whole.
   - `next.md`: the prompt this chat writes for Code.
   - `hook-error.log`: present only if the hook failed, timed out waiting for its lock, or found code-handoff installed twice. For a double install, tell the user to keep one copy (see the plugin README's Install section).
-- `/next` in Claude Code (`commands/next.md`, user level or in the project) runs `handoff/next.md`. `/next some extra note` adds a note.
+- `/code-handoff:next` (or `/next` if the user used the installer) in Claude Code (`commands/next.md`) runs `handoff/next.md`. Anything typed after the command, such as `/code-handoff:next some extra note`, is added as a note.
 
 ## Steps
 
@@ -42,7 +42,7 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
 
    For a decision, give the options with your recommendation and one line on each trade-off. Take one step at a time if the user wants. Ask them to say "done" or paste the output, and check it before moving on. If a step fails, help them fix it, or fold the fix into Code's prompt if Code can do it. Write `next.md` only once the steps are done, or once the user says to go ahead anyway. In that case, open the prompt with a prerequisite check Code must run first, such as `git log main` showing the merge, and tell it to stop and report if the check fails. If there are no user steps, say so in one line and go straight to the prompt.
 6. **Draft the next prompt** in this chat with the user. A good prompt is self-contained, names files by path, does one coherent step, says how to verify it (tests or commands to run) and says what to report back. Show the prompt in full before sending it.
-7. **Send it.** When the user approves or asks you to send it, overwrite `handoff/next.md` with device_bash, using a quoted heredoc (`cat > .../next.md <<'EOF'`). Make the first line `<!-- from planning chat, YYYY-MM-DD HH:MM -->`. Then tell the user to type `/next` in Claude Code.
+7. **Send it.** When the user approves or asks you to send it, overwrite `handoff/next.md` with device_bash, using a quoted heredoc (`cat > .../next.md <<'EOF'`). Make the first line `<!-- from planning chat, YYYY-MM-DD HH:MM -->`. Then tell the user to type `/code-handoff:next` (or `/next` if they used the installer) in Claude Code.
 8. **Check the loop.** If the prompt in `last.md` matches `next.md`, the last handoff ran. If `last.md` is older than `next.md`, Code hasn't run it yet.
 
 ## Rules
@@ -59,4 +59,4 @@ The user plans in this chat and codes in Claude Code. Instead of screenshots, Cl
 
 ## New projects
 
-The hook and `/next` are installed once for all projects, either by the code-handoff Claude Code plugin or by forge-kit's `installers\windows\install.ps1`, which copies them into the user's own `%USERPROFILE%\.claude` folder. A new project needs no setup on the Code side. After Code's first turn in the project, the hook creates `<project>\.claude\handoff\` itself. In this chat, the user only adds that project's `.claude` folder with + -> Add folder. If a project has no `handoff` folder after a Code turn, check that the user-level `settings.json` still has the Stop hook pointing to `.claude/hooks/handoff.ps1`. If it doesn't, have the user re-run the installer.
+The hook and the command, `/code-handoff:next` (or `/next` if the user used the installer), are installed once for all projects, either by the code-handoff Claude Code plugin or by forge-kit's `installers\windows\install.ps1`, which copies them into the user's own `%USERPROFILE%\.claude` folder. A new project needs no setup on the Code side. After Code's first turn in the project, the hook creates `<project>\.claude\handoff\` itself. In this chat, the user only adds that project's `.claude` folder with + -> Add folder. If a project has no `handoff` folder after a Code turn, check that the user-level `settings.json` still has the Stop hook pointing to `.claude/hooks/handoff.ps1`. If it doesn't, have the user re-run the installer.

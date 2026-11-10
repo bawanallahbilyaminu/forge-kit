@@ -2,13 +2,13 @@
 
 This plugin stops you from screenshotting Claude Code's replies into your planning chat.
 
-- **In Claude Code**, a Stop hook runs after every turn. It writes `.claude/handoff/last.md` with your prompt, Claude Code's reply, the files changed, the commands run and any errors. It also appends each turn to `history.md` and saves a copy of the full transcript. The `/next` command runs the prompt your planning chat left in `.claude/handoff/next.md`.
+- **In Claude Code**, a Stop hook runs after every turn. It writes `.claude/handoff/last.md` with your prompt, Claude Code's reply, the files changed, the commands run and any errors. It also appends each turn to `history.md` and saves a copy of the full transcript. Typing `/code-handoff:next` (or `/next` if you used the installer) runs the prompt your planning chat left in `.claude/handoff/next.md`.
 - **In the planning chat** (the Claude app), `/code-handoff` reads `last.md` and reports what Code did. It walks you through any steps only you can do, then writes the next prompt to `next.md`.
 
 The handoff folder ignores itself in git.
 
 ## Install
-Pick one way to install it on the Claude Code side. Both give you the same hook and the same `/next` command in every project.
+Pick one way to install it on the Claude Code side. Both give you the same hook and the same command in every project: `/code-handoff:next` with the plugin, or `/next` with the installer.
 
 | | **Plugin (recommended)** | **Installer (fallback, Windows)** |
 |---|---|---|

@@ -20,11 +20,11 @@ On older versions, run `/plugin marketplace add bawanallahbilyaminu/forge-kit` a
 1. Describe your idea in a chat, then type `/idea-council`.
 2. If the verdict is Build or Build with changes, type `/idea-refine`. Push back until you're happy, then say "approve".
 3. Type `/idea-launch`.
-4. For software, type `/idea-code-setup`. Then open Claude Code in the new folder and type `/next`, which runs the kickoff prompt.
+4. For software, type `/idea-code-setup`. Then open Claude Code in the new folder and type `/code-handoff:next` (or `/next` if you used the installer), which runs the kickoff prompt.
 
 Each stage reads the previous stage's file, so you can continue in a different chat. Name the idea, or the chat will list the ideas in `<projects>\_idea-forge`.
 
 ## Requirements
 - The Claude desktop app, with your projects folder connected. The default is `C:\Projects-Windows` on Windows and `~/Projects` on macOS and Linux. The first command asks once where to keep your projects, saves the answer in `<projects>\_idea-forge\config.json`, and asks for access to that folder. To move it later, tell any idea-forge command to use a different folder, or edit `projectsDir` in that file.
 - GitHub CLI (`gh`) signed in on your computer. Claude Code uses it to create the repo.
-- code-handoff installed once, either as the plugin or with the Windows installer (`installers\windows\install.ps1` in forge-kit), but not both. It gives `/next` and `/code-handoff`.
+- code-handoff installed once, either as the plugin or with the Windows installer (`installers\windows\install.ps1` in forge-kit), but not both. It gives `/code-handoff:next` (or `/next` if you used the installer) in Claude Code and `/code-handoff` in the planning chat.

@@ -3,21 +3,21 @@
   "owner": { "name": "Bilyaminu Bawan Allah" },
   "metadata": {
     "description": "Tools for working with Claude across the planning chat and Claude Code: an idea-to-project pipeline and a two-way handoff between planning and coding sessions.",
-    "version": "0.3.0"
+    "version": "0.3.1"
   },
   "plugins": [
     {
       "name": "idea-forge",
       "source": "./plugins/idea-forge",
       "description": "A council of critics gives an idea a verdict, a council of builders refines it, then the project folder, the full documentation set and the Claude Code setup are generated.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "category": "productivity"
     },
     {
       "name": "code-handoff",
       "source": "./plugins/code-handoff",
-      "description": "Claude Code writes a summary of every turn for your planning chat, and the planning chat writes the next prompt back for /next. No more screenshots.",
-      "version": "0.2.0",
+      "description": "Claude Code writes a summary of every turn for your planning chat, and the planning chat writes the next prompt back for /code-handoff:next (or /next if you used the installer). No more screenshots.",
+      "version": "0.2.1",
       "category": "productivity"
     }
   ]
