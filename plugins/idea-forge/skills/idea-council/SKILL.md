@@ -7,12 +7,12 @@ description: >
   idea, an advocate who answers them, and a judge who gives a Build / Build with changes /
   Don't build verdict.
 metadata:
-  version: "0.1.1"
+  version: "0.2.1"
 ---
 
 # Idea Council: brutal critique and verdict
 
-The user has usually described ("yarned") the idea earlier in this conversation, then invoked this command, sometimes with extra notes after it. The job is to decide honestly whether the idea is worth building. Don't cheerlead. A "Don't build" that saves the user months is a good outcome.
+The user has usually described the idea earlier in this conversation, then invoked this command, sometimes with extra notes after it. The job is to decide honestly whether the idea is worth building. Don't cheerlead. A "Don't build" that saves the user months is a good outcome.
 
 Stance: **brutal but fair.** Critics try hard to kill the idea, but every attack needs a reason, evidence where it can be found, and a severity rating. The judge can still say Build.
 
@@ -23,7 +23,7 @@ Pull together everything the user said about the idea in this conversation, plus
 - one-line pitch
 - the problem, and who has it
 - the proposed solution
-- target users and market (the location, for example Sokoto, Nigeria or the world)
+- target users and market, including the location (a city, a country or worldwide; for example, a user in Sokoto, Nigeria)
 - how it makes money or creates value
 - the user's own advantages (skills, access, existing projects)
 - known constraints (budget, time, team)
@@ -31,7 +31,7 @@ Pull together everything the user said about the idea in this conversation, plus
 
 Fill gaps only from what the user said or from facts that are reasonable to look up. Label anything assumed as **Assumption**. If a gap would change the verdict (for example, no idea who the user is), ask at most 2 short questions with AskUserQuestion. Otherwise proceed and list the assumptions.
 
-Pick a kebab-case **slug** for the idea, such as `kobo-sms-bridge`.
+Pick a kebab-case **slug** for the idea, such as `clinic-sms-reminders`.
 
 ## 2. Round 1: five critics, in parallel
 
@@ -60,12 +60,9 @@ Spawn one **Judge** agent, a fresh agent that hasn't written anything yet. Give 
 
 ## 5. Save and present
 
-Get access to the user's `C:\Projects-Windows` folder:
-- If it's connected, use device_bash on `$HOME/mnt/Projects-Windows`, or the local file tools if this session runs on the computer.
-- If it isn't, request access with device_request_folder_access (reason: "to save your idea's council verdict"), or ask the user to add it with + → Add folder.
-- If access isn't possible, keep everything in the chat and say so.
+Resolve the projects folder as described in `references/projects-folder.md`. Use the reason "to save your idea's council verdict" if you need to request access. If access isn't possible, keep everything in the chat and say so.
 
-Write `C:\Projects-Windows\_idea-forge\<slug>\01-council-verdict.md` containing the Idea Brief, the full critiques under a heading for each critic, the advocate's reply and the judge's verdict. Start the file with front matter: `slug`, `name`, `type`, `date`, `verdict`, `stage: council`.
+Write `<projects>/_idea-forge/<slug>/01-council-verdict.md` containing the Idea Brief, the full critiques under a heading for each critic, the advocate's reply and the judge's verdict. Start the file with front matter: `slug`, `name`, `type`, `date`, `verdict`, `stage: council`.
 
 Reply to the user in this order:
 1. The verdict and confidence level, stated plainly in the first line.

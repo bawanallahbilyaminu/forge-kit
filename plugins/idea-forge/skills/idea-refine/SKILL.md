@@ -6,7 +6,7 @@ description: >
   It runs a council of builder agents that turn a judged idea into one refined concept, works in the
   critics' points, and iterates with the user until they approve it.
 metadata:
-  version: "0.1.1"
+  version: "0.2.1"
 ---
 
 # Idea Refine: builders' council
@@ -15,9 +15,9 @@ Turn the idea into the strongest buildable concept. Fix the problems the critics
 
 ## 1. Load the idea
 
-Find the idea's folder at `C:\Projects-Windows\_idea-forge\<slug>\`. Access it with device_bash on `$HOME/mnt/Projects-Windows`, or the local file tools, as described in /idea-council.
+Resolve the projects folder as described in `references/projects-folder.md`. Find the idea's folder at `<projects>/_idea-forge/<slug>/`.
 - If the user named the idea, or it was just judged in this chat, use that one.
-- Otherwise, list the folders in `_idea-forge` and ask which idea to use.
+- Otherwise, list the folders in `<projects>/_idea-forge/` and ask which idea to use.
 - Read `01-council-verdict.md`.
 - If there's no verdict file but the idea was discussed in this chat, build an Idea Brief from the chat and say that the council was skipped.
 - If the verdict was **Don't build**, say so in one line and ask whether the user wants to refine anyway as a pivot. Then continue on their answer.
@@ -41,7 +41,7 @@ Then spawn a quick **Red-team check** agent. Give it the Refined Concept and the
 
 ## 4. Present it and iterate
 
-Write `C:\Projects-Windows\_idea-forge\<slug>\02-refined-concept.md`. Give it front matter with `slug`, `name`, `type`, `date`, `status: draft` and `version: 1`, followed by the Refined Concept and the red-team table.
+Write `<projects>/_idea-forge/<slug>/02-refined-concept.md`. Give it front matter with `slug`, `name`, `type`, `date`, `status: draft` and `version: 1`, followed by the Refined Concept and the red-team table.
 
 Show the user:
 - the one-line pitch

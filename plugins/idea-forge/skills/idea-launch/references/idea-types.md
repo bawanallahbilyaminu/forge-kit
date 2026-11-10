@@ -2,6 +2,8 @@
 
 Choose the set that matches the concept's **Idea type**. Mixed ideas (for example a content channel with an app) take the primary type's set plus the specific documents they need from the other type.
 
+**Independent review (SKILL.md step 6).** Only the software set has an SRS, an SDD and a test plan, so only software ideas get the independent review, along with mixed ideas that took those three documents. For content, service, research, hardware, programme and other ideas, skip the review and say so in the reply. Don't adapt the briefs to other documents.
+
 ## software (apps, platforms, plugins, APIs, tools)
 
 ```
