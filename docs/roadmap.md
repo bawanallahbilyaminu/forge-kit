@@ -40,8 +40,10 @@ The checklist:
 - [x] `CHANGELOG.md` in Keep a Changelog format.
 - [x] Draft release notes: `docs/release-notes/v0.5.0.md`.
 - [x] Pre-release scan of the tree and the git history for personal data and secrets (reported in the M4 PR).
-- [ ] The user approves the icons.
-- [ ] The user tags `v0.5.0` and creates the GitHub Release with `dist/idea-forge.plugin` and `dist/code-handoff.plugin`.
+- [x] The user approves the icons. They were approved as drawn on 2026-11-10.
+- [x] Tag `v0.5.0`: annotated, on main at `75c0b9f` (the PR #6 merge), pushed on 2026-11-10.
+- [x] A draft GitHub Release "forge-kit v0.5.0", with `dist/code-handoff.plugin` and `dist/idea-forge.plugin` built from that commit.
+- [ ] The user publishes the release.
 - [ ] A GIF of the loop in the README.
 - [ ] The user makes the repo public.
 
