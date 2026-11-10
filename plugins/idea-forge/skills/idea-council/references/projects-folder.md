@@ -41,4 +41,4 @@ The file lives inside the folder it describes, so you can't read it until you've
 - **The user connects a different folder that has its own config:** step 2 finds and uses it. Nothing is cached between chats, so every new chat resolves the folder again.
 
 ## In the other skills
-Wherever a skill says "the projects folder", it means the folder resolved here. Write paths as `<projects>/<slug>/` and `<projects>/_idea-forge/<slug>/`. When you show the user a path, show the real path on their computer, for example `D:\Work\Projects\kobo-sms-bridge`, not the mount path.
+Wherever a skill says "the projects folder", it means the folder resolved here. Write paths as `<projects>/<slug>/` and `<projects>/_idea-forge/<slug>/`. When you show the user a path, show the real path on their computer, for example `D:\Work\Projects\clinic-sms-reminders`, not the mount path.

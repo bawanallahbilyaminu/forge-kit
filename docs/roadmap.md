@@ -11,7 +11,7 @@
 
 ## M1: Portability
 - [x] Make the projects folder configurable in idea-forge. Ask once and remember the answer in `<projects>/_idea-forge/config.json`. Default to `C:\Projects-Windows` on Windows and `~/Projects` elsewhere. Done in 0.2.0: see `plugins/idea-forge/skills/idea-launch/references/projects-folder.md`.
-- [ ] Remove the author-specific wording from the skills. Keep the local context examples, such as Hausa and Sokoto, as examples only.
+- [x] Remove the author-specific wording from the skills. Keep the local context examples, such as Hausa and Sokoto, as examples only. Done in 0.2.1.
 - [ ] Document the two ways to install code-handoff (plugin or installer), and make sure they can't both run.
 - [ ] **No-context review in `/idea-launch`** (borrowed from EGM's "goldfish" reviewers). After the documents are written, spawn fresh agents that get only the finished SRS and SDD, with no chat history and no ideation files. One looks for gaps and contradictions. One checks whether Claude Code could build M0 and M1 from these documents alone. One checks traceability against the test cases. Fix what they find, or list it under Open questions, and add a short review summary to `docs/README.md`.
 - [ ] **Point new projects at EGM for big features.** In `/idea-code-setup`'s CLAUDE.md template, add a rule: before building a feature that needs architecture decisions, run the EGM workflow (`/egm:egm-brainstorm`, then `/egm:egm-draft`, then `/egm:egm-review`) if the EGM plugin is installed, and save the design under `docs/04-architecture/features/`. Mention EGM as optional in the forge-kit README, with a link to github.com/google/elephant-goldfish-model.
@@ -35,6 +35,11 @@
 - The handoff hook can be installed twice (plugin and installer), and then every turn is written twice.
 
 ## Changelog
+- 0.2.1 (idea-forge and the marketplace):
+  - The skills no longer assume who the user is. Removed the regional idiom "yarned" from idea-council, and the assumptions that the user has a job (Cost critic) and their own company (Business Model builder). The privacy NFR now asks for the data protection law where the users and data are, with GDPR and the NDPA as examples, instead of defaulting to Nigeria's NDPA.
+  - The local-context examples are framed as examples, such as "for example, a user in Sokoto, Nigeria" and "Hausa and English for users in northern Nigeria", and the critics and builders now ask about the users' languages in general.
+  - The example slug `kobo-sms-bridge` is now `clinic-sms-reminders` everywhere, including all four copies of `projects-folder.md`.
+  - Tested 0.2.0 in the Claude app: with the projects folder connected, `/idea-council` wrote `_idea-forge/config.json` and the verdict in the right place. In a fresh chat without the folder, it got the folder and reused the existing config without rewriting it.
 - 0.2.0 (idea-forge and the marketplace):
   - The projects folder is configurable. idea-forge asks once where to keep projects, defaulting to `C:\Projects-Windows` on Windows and `~/Projects` elsewhere, and saves the answer in `<projects>/_idea-forge/config.json`. The skills and README no longer hardcode the path.
   - The config is found only when the projects folder is connected in the current chat. In a new chat, the skill either finds it in a connected folder or asks for the folder again, offering the remembered or default path first.

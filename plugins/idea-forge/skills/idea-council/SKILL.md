@@ -7,12 +7,12 @@ description: >
   idea, an advocate who answers them, and a judge who gives a Build / Build with changes /
   Don't build verdict.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Idea Council: brutal critique and verdict
 
-The user has usually described ("yarned") the idea earlier in this conversation, then invoked this command, sometimes with extra notes after it. The job is to decide honestly whether the idea is worth building. Don't cheerlead. A "Don't build" that saves the user months is a good outcome.
+The user has usually described the idea earlier in this conversation, then invoked this command, sometimes with extra notes after it. The job is to decide honestly whether the idea is worth building. Don't cheerlead. A "Don't build" that saves the user months is a good outcome.
 
 Stance: **brutal but fair.** Critics try hard to kill the idea, but every attack needs a reason, evidence where it can be found, and a severity rating. The judge can still say Build.
 
@@ -23,7 +23,7 @@ Pull together everything the user said about the idea in this conversation, plus
 - one-line pitch
 - the problem, and who has it
 - the proposed solution
-- target users and market (the location, for example Sokoto, Nigeria or the world)
+- target users and market, including the location (a city, a country or worldwide; for example, a user in Sokoto, Nigeria)
 - how it makes money or creates value
 - the user's own advantages (skills, access, existing projects)
 - known constraints (budget, time, team)
@@ -31,7 +31,7 @@ Pull together everything the user said about the idea in this conversation, plus
 
 Fill gaps only from what the user said or from facts that are reasonable to look up. Label anything assumed as **Assumption**. If a gap would change the verdict (for example, no idea who the user is), ask at most 2 short questions with AskUserQuestion. Otherwise proceed and list the assumptions.
 
-Pick a kebab-case **slug** for the idea, such as `kobo-sms-bridge`.
+Pick a kebab-case **slug** for the idea, such as `clinic-sms-reminders`.
 
 ## 2. Round 1: five critics, in parallel
 

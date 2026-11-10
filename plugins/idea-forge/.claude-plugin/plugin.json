@@ -1,6 +1,6 @@
 {
   "name": "idea-forge",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Takes an idea from brainstorm to build: a council of critics gives a verdict, a council of builders refines it, then the project folder, full documentation set and Claude Code setup are generated.",
   "author": { "name": "Bilyaminu Bawan Allah" },
   "keywords": ["ideas", "brainstorm", "council", "software engineering", "documentation", "claude code"]

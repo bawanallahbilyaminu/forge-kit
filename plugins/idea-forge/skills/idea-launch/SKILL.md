@@ -7,7 +7,7 @@ description: >
   folder structure, and writes the full documentation set for the idea's type (URS, SRS, BRD, PRD, SDD,
   data design, wireframes, test plan, WBS and more for software).
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Idea Launch: project folder and documentation
@@ -25,7 +25,7 @@ Read `<projects>/_idea-forge/<slug>/02-refined-concept.md` and `01-council-verdi
 ## 2. Confirm the name and type, once
 
 With one AskUserQuestion call, confirm:
-- the **folder name**: the slug by default, for example `<projects>/kobo-sms-bridge`, shown to the user as the real path on their computer
+- the **folder name**: the slug by default, for example `<projects>/clinic-sms-reminders`, shown to the user as the real path on their computer
 - the **idea type** from the concept, which selects the document set in `references/idea-types.md`
 
 If the folder already exists and isn't empty, stop and ask whether to use a different name or add into it. Never overwrite existing files.

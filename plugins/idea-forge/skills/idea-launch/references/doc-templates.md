@@ -39,7 +39,7 @@ Write real content for every section. If a section doesn't apply, say why in one
 2. Overall description: product perspective (context diagram in Mermaid), product functions, user classes, operating environment, design and implementation constraints, assumptions and dependencies.
 3. External interface requirements: UI, hardware, software (APIs and integrations with their limits), communications.
 4. Functional requirements: `FR-xx` grouped by feature. Each has a description, inputs, processing, outputs, errors, priority, and traces-to (`UR-xx`, `US-xx`).
-5. Non-functional requirements `NFR-xx`: performance, security, privacy and data protection (NDPA in Nigeria, GDPR where relevant), reliability and availability, usability and accessibility, localisation, maintainability, portability, compliance. Each must be measurable.
+5. Non-functional requirements `NFR-xx`: performance, security, privacy and data protection under the laws that apply where the users and data are (for example GDPR in the EU, or the NDPA for users in Nigeria), reliability and availability, usability and accessibility, localisation, maintainability, portability, compliance. Each must be measurable.
 6. Data requirements summary (details in data-design.md).
 7. Appendices.
 
