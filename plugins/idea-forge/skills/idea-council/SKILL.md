@@ -60,7 +60,7 @@ Spawn one **Judge** agent, a fresh agent that hasn't written anything yet. Give 
 
 ## 5. Save and present
 
-Resolve the projects folder as described in `../idea-launch/references/projects-folder.md`. Use the reason "to save your idea's council verdict" if you need to request access. If access isn't possible, keep everything in the chat and say so.
+Resolve the projects folder as described in `references/projects-folder.md`. Use the reason "to save your idea's council verdict" if you need to request access. If access isn't possible, keep everything in the chat and say so.
 
 Write `<projects>/_idea-forge/<slug>/01-council-verdict.md` containing the Idea Brief, the full critiques under a heading for each critic, the advocate's reply and the judge's verdict. Start the file with front matter: `slug`, `name`, `type`, `date`, `verdict`, `stage: council`.
 

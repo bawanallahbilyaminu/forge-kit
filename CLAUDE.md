@@ -20,9 +20,10 @@ See `README.md` for the user view, `docs/architecture.md` for how the pieces fit
 | Validate the marketplace | `claude plugin validate .claude-plugin/marketplace.json` |
 | Build `.plugin` files | `powershell -File scripts/build-plugins.ps1` (writes `dist/`) |
 | Parse-check and ASCII-check every .ps1 | `powershell -NoProfile -File scripts/check-powershell.ps1` |
+| Check shared skill files are identical copies | `powershell -NoProfile -File scripts/check-shared-refs.ps1` (the list of shared files is at the top of the script) |
 | Parse-check one .ps1 | `powershell -NoProfile -Command "$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>', [ref]$null, [ref]$e); $e"` |
 
-CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, `claude plugin validate` and the build.
+CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the version-sync check, the PowerShell check, the shared-file check, `claude plugin validate` and the build.
 
 ## Rules for this repo
 - **Skills are instructions for Claude.** Write them in the imperative ("Read the file", not "You should read"). Keep each SKILL.md under about 3,000 words and move detail into `references/`. Frontmatter descriptions say when the skill is used, with trigger phrases.
@@ -32,7 +33,7 @@ CI (`.github/workflows/ci.yml`, `windows-latest`) runs the JSON check, the versi
   - Around native commands like `git`, use `$ErrorActionPreference = 'SilentlyContinue'`.
   - Hooks must always exit 0 unless they intentionally block with exit code 2.
 - **Hooks must never break a user's session.** Wrap everything in try/catch and log failures to the handoff folder, not to the console.
-- **Paths:** use `${CLAUDE_PLUGIN_ROOT}` in plugin hooks. Never hardcode a user's path. idea-forge resolves the projects folder through `plugins/idea-forge/skills/idea-launch/references/projects-folder.md`. `C:\Projects-Windows` appears only as the stated Windows default.
+- **Paths:** use `${CLAUDE_PLUGIN_ROOT}` in plugin hooks. Never hardcode a user's path. idea-forge resolves the projects folder through `references/projects-folder.md` in each skill. The source is the copy in `idea-launch`; edit it there, copy it to the other skills, and run `scripts/check-shared-refs.ps1`. A skill never reads files from a sibling skill. `C:\Projects-Windows` appears only as the stated Windows default.
 - **Bump versions** in `plugin.json` and `marketplace.json` for any user-visible change, and note the change in `docs/roadmap.md` under Changelog.
 - **No personal data** in the repo, such as emails, tokens, client names or real project data.
 

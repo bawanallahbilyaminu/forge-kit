@@ -15,7 +15,7 @@ Turn the idea into the strongest buildable concept. Fix the problems the critics
 
 ## 1. Load the idea
 
-Resolve the projects folder as described in `../idea-launch/references/projects-folder.md`. Find the idea's folder at `<projects>/_idea-forge/<slug>/`.
+Resolve the projects folder as described in `references/projects-folder.md`. Find the idea's folder at `<projects>/_idea-forge/<slug>/`.
 - If the user named the idea, or it was just judged in this chat, use that one.
 - Otherwise, list the folders in `<projects>/_idea-forge/` and ask which idea to use.
 - Read `01-council-verdict.md`.

@@ -19,7 +19,7 @@ Prepare a launched project so that Claude Code can start building with one comma
 
 ## 1. Load the project
 
-Resolve the projects folder as described in `../idea-launch/references/projects-folder.md`. Find the project folder, either the one just launched in this chat or the one the user names, and check that it has a `docs/` folder. If it doesn't, suggest `/idea-launch` first.
+Resolve the projects folder as described in `references/projects-folder.md`. Find the project folder, either the one just launched in this chat or the one the user names, and check that it has a `docs/` folder. If it doesn't, suggest `/idea-launch` first.
 
 Read:
 - `README.md`

@@ -45,6 +45,10 @@ jobs:
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-powershell.ps1
 
+      - name: Check shared skill files are identical
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-shared-refs.ps1
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

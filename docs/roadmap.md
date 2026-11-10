@@ -35,7 +35,11 @@
 - The handoff hook can be installed twice (plugin and installer), and then every turn is written twice.
 
 ## Changelog
-- 0.2.0 (idea-forge): the projects folder is configurable. idea-forge asks once where to keep projects, defaulting to `C:\Projects-Windows` on Windows and `~/Projects` elsewhere, and saves the answer in `<projects>/_idea-forge/config.json`. Each new chat finds the config by checking the connected folders for `_idea-forge/config.json`. The lookup lives in one file, `skills/idea-launch/references/projects-folder.md`, which all four skills point to, and the skills and README no longer hardcode the path. code-handoff stays at 0.1.1.
+- 0.2.0 (idea-forge and the marketplace):
+  - The projects folder is configurable. idea-forge asks once where to keep projects, defaulting to `C:\Projects-Windows` on Windows and `~/Projects` elsewhere, and saves the answer in `<projects>/_idea-forge/config.json`. The skills and README no longer hardcode the path.
+  - The config is found only when the projects folder is connected in the current chat. In a new chat, the skill either finds it in a connected folder or asks for the folder again, offering the remembered or default path first.
+  - Each skill has its own copy of `references/projects-folder.md`, because the Claude app can install skills one by one, each in its own folder, so a path into a sibling skill may not exist. The source is the idea-launch copy. `scripts/check-shared-refs.ps1`, run in CI, checks that the copies are identical.
+  - The marketplace version is 0.2.0. code-handoff stays at 0.1.1.
 - 0.1.1:
   - handoff.ps1 serialises concurrent runs with a per-project mutex and skips a turn it has already written. Claude Code was seen firing the Stop hook twice for one turn, which wrote duplicate history entries and caused a lock error on transcript.jsonl. The mutex is released and disposed in a `finally` on every exit path, and if the 30-second wait times out the hook logs it to `hook-error.log` and continues without the lock.
   - idea-code-setup stages the `.claude/` files in `setup/dot-claude/` for the kickoff to move.
